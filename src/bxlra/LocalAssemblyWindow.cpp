@@ -27,10 +27,12 @@ size_t LocalAssemblyWindow::retrieveGenomewideReads() {
 
   // Barcode frequency in assembly window
   std::cerr << std::endl;
+  size_t total = 0;
   for (const auto &b : barcodes) {
     std::cerr << b.first << " " << b.second << std::endl;
+    total += b.second;
   }
-  std::cerr << std::endl;
+  std::cerr << "Sum " << total << std::endl;
 
   m_reads = m_bx_bam.fetchReadsByBxBarcode(barcodes);
   return m_reads.size();
@@ -198,6 +200,7 @@ BxBarcodeCounts LocalAssemblyWindow::collectLocalBarcodes() {
       break;
   }
 
+  std::cerr << "Local reads: " << read_vector.size() << std::endl;
   return BxBamWalker::collectBxBarcodes(read_vector);
 }
 
@@ -213,9 +216,8 @@ void LocalAssemblyWindow::createReadTable() {
     std::string seq = i.Sequence();
     // ignore uncalled bases or reads that are too short
     // IMPORTANT: cannot build suffix array/index when reads have uncalled bases
-    if (seq.find("N") != std::string::npos ||
-        seq.length() < m_params.min_overlap)
-      continue;
+    if (seq.find("N") != std::string::npos || seq.length() < m_params.min_overlap)
+        continue;
     std::string seq_id = std::to_string(++count);
 
     if (!i.MappedFlag() && !i.MateReverseFlag())
@@ -226,4 +228,34 @@ void LocalAssemblyWindow::createReadTable() {
     seq_item.id = seq_id;
     m_read_table.addRead(seq_item);
   }
+
+  // duplicate removal
+
+  //construct an index and check each read for duplicates
+  // against this index
+  SuffixArray forward_suffix_array(&m_read_table, 1, false); 
+  RLBWT forward_BWT(&forward_suffix_array, &m_read_table);
+
+  // reverse
+  m_read_table.reverseAll();
+  SuffixArray reverse_suffix_array(&m_read_table, 1, false);
+  RLBWT reverse_RBWT(&reverse_suffix_array, &m_read_table);
+  m_read_table.reverseAll();
+
+  OverlapAlgorithm dup_overlapper(&forward_BWT, &reverse_RBWT, 0, 0, 0, false);
+
+  m_read_table.setZero();
+  ReadTable undup_read_table;
+  SeqItem sir;
+  while (m_read_table.getRead(sir)) {
+    OverlapBlockList overlap_block;
+    SeqRecord read;
+    read.id = sir.id;
+    read.seq = sir.seq;
+    OverlapResult rr = dup_overlapper.alignReadDuplicate(read, &overlap_block);
+
+    if (!rr.isSubstring)
+      undup_read_table.addRead(sir);
+  }
+  m_read_table = undup_read_table;
 }
