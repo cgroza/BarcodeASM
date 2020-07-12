@@ -67,6 +67,7 @@ BxBamWalker::fetchReadsByBxBarcode(const BxBarcodeCounts &bx_barcodes) {
 
 // std::set<BxBarcode>
 BxBarcodeCounts BxBamWalker::collectBxBarcodes(const BamReadVector &reads) {
+  std::cerr << "Received " << reads.size() <<  " reads for barcode collection" << std::endl;
   BxBarcodeCounts barcodes;
   for (const SeqLib::BamRecord &r : reads) {
     std::string bx_tag;
