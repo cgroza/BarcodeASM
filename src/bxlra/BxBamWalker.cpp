@@ -50,31 +50,37 @@ BamReadVector
     return read_vector;
 }
 
-BamReadVector BxBamWalker::fetchReadsByBxBarcode(
-                                              const std::set<BxBarcode> &bx_barcodes) {
-    BamReadVector all_reads;
-    for (const BxBarcode &barcode : bx_barcodes) {
-        std::string barcode_copy = barcode;
-        // "-" gets translated to "_" during bxtools convert. We must correct this.
-        std::replace(barcode_copy.begin(), barcode_copy.end(), '-', '_');
-        BamReadVector reads = fetchReadsByBxBarcode(barcode_copy);
-        // move the reads into all_reads
-        std::move(reads.begin(), reads.end(), std::back_inserter(all_reads));
-    }
-    return all_reads;
+BamReadVector
+BxBamWalker::fetchReadsByBxBarcode(const BxBarcodeCounts &bx_barcodes) {
+  BamReadVector all_reads;
+  for (const auto &barcode_count : bx_barcodes) {
+    const BxBarcode &barcode = barcode_count.first;
+    std::string barcode_copy = barcode;
+    // "-" gets translated to "_" during bxtools convert. We must correct this.
+    std::replace(barcode_copy.begin(), barcode_copy.end(), '-', '_');
+    BamReadVector reads = fetchReadsByBxBarcode(barcode_copy);
+    // move the reads into all_reads
+    std::move(reads.begin(), reads.end(), std::back_inserter(all_reads));
+  }
+  return all_reads;
 }
 
-std::set<BxBarcode>
-    BxBamWalker::collectBxBarcodes(const BamReadVector &reads) {
-    std::set<BxBarcode> barcodes;
-    for (const SeqLib::BamRecord &r : reads) {
-        std::string bx_tag;
-        // tag may not always be present
-        if (r.GetZTag("BX", bx_tag)) {
-            barcodes.insert(bx_tag);
+// std::set<BxBarcode>
+BxBarcodeCounts BxBamWalker::collectBxBarcodes(const BamReadVector &reads) {
+  BxBarcodeCounts barcodes;
+  for (const SeqLib::BamRecord &r : reads) {
+    std::string bx_tag;
+    // tag may not always be present
+    if (r.GetZTag("BX", bx_tag)) {
+        if (barcodes.find(bx_tag) == barcodes.end()) {
+            barcodes[bx_tag] = 1;
+        }
+        else {
+            barcodes[bx_tag] = barcodes[bx_tag] + 1;
         }
     }
-    return barcodes;
+  }
+  return barcodes;
 }
 
 bool BxBamWalker::isBxReadWeird(SeqLib::BamRecord &r) {

@@ -21,6 +21,9 @@ int main(int argc, char **argv) {
 
   for (auto &region : region_reader.getRegions()) {
       LocalAssemblyWindow local_win(region, bam_reader, bx_bam_walker);
-      std::cerr << local_win.retrieveReads() << std::endl;
+      // std::cerr << local_win.retrieveGenomewideReads() << std::endl;
+      local_win.assembleReads();
+      std::cerr << "Reads: " << local_win.getReads().size() << std::endl;
+      std::cerr << "Contigs: " << local_win.getContigs().size() << std::endl;
   }
 }

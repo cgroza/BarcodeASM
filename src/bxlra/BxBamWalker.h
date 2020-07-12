@@ -6,6 +6,7 @@
 #include "SeqLib/BamRecord.h"
 #include "SeqLib/GenomicRegion.h"
 #include <algorithm>
+#include <unordered_map>
 #include <set>
 #include <string>
 #include <vector>
@@ -14,6 +15,7 @@
 
 /* Let's distinguish regular strings from BxBarcodes in the source code */
 typedef std::string BxBarcode;
+typedef std::unordered_map<BxBarcode, int> BxBarcodeCounts;
 typedef std::vector<SeqLib::BamRecord> BamReadVector;
 
 class BxBamWalker : public SeqLib::BamReader {
@@ -32,9 +34,9 @@ class BxBamWalker : public SeqLib::BamReader {
 
     /*  */
     BamReadVector fetchReadsByBxBarcode(const BxBarcode &bx_barcode);
-    BamReadVector fetchReadsByBxBarcode(const std::set<BxBarcode> &bx_barcodes);
+    BamReadVector fetchReadsByBxBarcode(const BxBarcodeCounts &bx_barcodes);
 
-    static std::set<BxBarcode> collectBxBarcodes(const BamReadVector &reads);
+    static BxBarcodeCounts collectBxBarcodes(const BamReadVector &reads);
     std::string prefix;
 
     static bool isBxReadWeird(SeqLib::BamRecord &r);
