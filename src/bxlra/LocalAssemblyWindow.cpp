@@ -9,6 +9,7 @@
 #include "SuffixArray.h"
 #include "Util.h"
 #include <algorithm>
+#include <fstream>
 #include <iterator>
 #include <sstream>
 #include <string>
@@ -19,8 +20,7 @@ LocalAssemblyWindow::LocalAssemblyWindow(SeqLib::GenomicRegion region,
     : m_region(region), m_bam(bam), m_bx_bam(bx_bam) {
 
   std::stringstream prefix_ss;
-  prefix_ss << region.ChrName(bam.Header()) << region.pos1 << "_" << region.pos2
-            << "_";
+  prefix_ss << region.ChrName(bam.Header()) << "_" << region.pos1 << "_" << region.pos2;
   m_prefix = prefix_ss.str();
 }
 
@@ -131,7 +131,7 @@ size_t LocalAssemblyWindow::assembleReads() {
 
   // dump raw overlap graph to file
   std::ofstream asqg_file_writer;
-  asqg_file_writer.open(m_prefix + "graph.asqg");
+  asqg_file_writer.open(m_prefix + "_graph.asqg");
   asqg_file_writer << asqg_writer.str();
   asqg_file_writer.close();
 
@@ -143,7 +143,6 @@ size_t LocalAssemblyWindow::assembleReads() {
 
 void LocalAssemblyWindow::assembleFromGraph(std::stringstream &asqg_stream,
                                             bool exact) {
-
   // configure string graph object
   StringGraph *str_graph =
       SGUtil::loadASQG(asqg_stream, m_params.min_overlap, true);
@@ -182,13 +181,79 @@ void LocalAssemblyWindow::assembleFromGraph(std::stringstream &asqg_stream,
   // walk graph to retrieve contigs
   walkAssemblyGraph(str_graph);
 
-  str_graph -> writeASQG(m_prefix + "pruned_graph.asqg");
+  str_graph -> writeASQG(m_prefix + "_pruned_graph.asqg");
   delete str_graph;
 }
 
 void LocalAssemblyWindow::walkAssemblyGraph(StringGraph *str_graph) {
-    // walk the connected components of the graph to retrieve the contigs
+    // this code is adapted from SGA
+    typedef std::vector<VertexPtrVec> ComponentVector;
+    VertexPtrVec all_vertices = str_graph -> getAllVertices();
+    ComponentVector components;
+    SGSearchTree::connectedComponents(all_vertices, components);
 
+    // Select the largest component
+    int selected_idx = -1;
+    size_t largestSize = 0;
+
+    for(size_t i = 0; i < components.size(); ++i)
+    {
+        std::cerr << "Component " << i << ": " << components[i].size() << " vertices" << std::endl;
+        if(components[i].size() > largestSize)
+        {
+            selected_idx = i;
+            largestSize = components[i].size();
+        }
+    }
+
+    assert(selected_idx != -1);
+    VertexPtrVec selected_component = components[selected_idx];
+
+    std::cerr << "component-walk: selected component of size " << selected_component.size() << std::endl;
+
+    // Build a vector of the terminal vertices
+    VertexPtrVec terminals;
+    for(size_t i = 0; i < selected_component.size(); ++i)
+    {
+        Vertex* vertex = selected_component[i];
+        size_t antisense_count = vertex->getEdges(ED_ANTISENSE).size();
+        size_t sense_count = vertex->getEdges(ED_SENSE).size();
+
+        if(antisense_count == 0 || sense_count == 0)
+            terminals.push_back(vertex);
+    }
+
+    std::cout << "selected component has " << terminals.size() << " terminal vertices" << std::endl;
+
+    // Find walks between all-pairs of terminal vertices
+    SGWalkVector temp_walks;
+    for(size_t i = 0; i < terminals.size(); ++i)
+    {
+        for(size_t j = i + 1; j < terminals.size(); j++)
+        {
+            Vertex* x = terminals[i];
+            Vertex* y = terminals[j];
+            SGSearch::findWalks(x, y, ED_SENSE, m_params.walk_max_distance, 1000000, false, temp_walks);
+            SGSearch::findWalks(x, y, ED_ANTISENSE, m_params.walk_max_distance, 1000000, false, temp_walks);
+        }
+    }
+
+    // Remove duplicate walks
+    std::map<std::string, SGWalk> walk_map;
+    for(size_t i = 0; i < temp_walks.size(); ++i)
+    {
+        std::string walk_string = temp_walks[i].getString(SGWT_START_TO_END);
+        walk_map.insert(std::make_pair(walk_string, temp_walks[i]));
+    }
+
+    // Copy unique walks to the output
+    size_t count = 0;
+    for(std::map<std::string, SGWalk>::iterator map_iter = walk_map.begin(); map_iter != walk_map.end(); ++map_iter) {
+        std::stringstream ss;
+        ss << m_prefix << "_" << count;
+        m_contigs.push_back(SeqLib::UnalignedSequence(ss.str(), map_iter -> first));
+        ++count;
+    }
 }
 
 
@@ -278,6 +343,13 @@ void LocalAssemblyWindow::sortContigs() {
               [](SeqLib::UnalignedSequence &a, SeqLib::UnalignedSequence &b) {
                   return a.Seq.length() > b.Seq.length();
               });
-
 }
 
+void LocalAssemblyWindow::writeContigs() {
+    std::ofstream fasta(m_prefix + ".fasta");
+    for(auto &contig : m_contigs) {
+        fasta << ">" << contig.Name << std::endl;
+        fasta << contig.Seq << std::endl;
+    }
+    fasta.close();
+}

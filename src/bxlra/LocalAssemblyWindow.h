@@ -32,6 +32,7 @@ struct AssemblyParams {
     size_t trim_rounds = 1;
     bool validate = true;
     size_t min_contig_length = 200;
+    size_t walk_max_distance = 10000;
 };
 
 
@@ -44,6 +45,7 @@ public:
     BxBarcodeCounts collectLocalBarcodes();
     SeqLib::UnalignedSequenceVector getContigs() const;
     BamReadVector getReads() const;
+    void writeContigs();
 
   private:
     void createReadTable();

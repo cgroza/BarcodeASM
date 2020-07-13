@@ -52,5 +52,6 @@ int main(int argc, char **argv) {
         {
             std::cerr << contig.Seq.length() << std::endl;
         }
+    local_win.writeContigs();
   }
 }
