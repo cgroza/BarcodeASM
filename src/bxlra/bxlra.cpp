@@ -48,5 +48,9 @@ int main(int argc, char **argv) {
     local_win.assembleReads();
     std::cerr << "Reads: " << local_win.getReads().size() << std::endl;
     std::cerr << "Contigs: " << local_win.getContigs().size() << std::endl;
+    for(auto &contig : local_win.getContigs())
+        {
+            std::cerr << contig.Seq.length() << std::endl;
+        }
   }
 }

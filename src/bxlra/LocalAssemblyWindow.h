@@ -28,9 +28,10 @@ struct AssemblyParams {
     bool get_components = true;
     size_t min_overlap = 90;
     bool perform_trim = true;
-    size_t trim_length_threshold = 100;
+    size_t trim_length_threshold = 160;
     size_t trim_rounds = 1;
     bool validate = true;
+    size_t min_contig_length = 200;
 };
 
 
@@ -47,6 +48,8 @@ public:
   private:
     void createReadTable();
     void assembleFromGraph(std::stringstream &asqg_stream, bool exact);
+    void sortContigs();
+    void walkAssemblyGraph(StringGraph *str_graph);
 
     SeqLib::GenomicRegion m_region;
     SeqLib::BamReader m_bam;

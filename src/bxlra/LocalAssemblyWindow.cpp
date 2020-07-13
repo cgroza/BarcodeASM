@@ -8,6 +8,8 @@
 #include "SeqLib/UnalignedSequence.h"
 #include "SuffixArray.h"
 #include "Util.h"
+#include <algorithm>
+#include <iterator>
 #include <sstream>
 #include <string>
 
@@ -24,6 +26,7 @@ LocalAssemblyWindow::LocalAssemblyWindow(SeqLib::GenomicRegion region,
 
 size_t LocalAssemblyWindow::retrieveGenomewideReads() {
   BxBarcodeCounts barcodes = collectLocalBarcodes();
+  std::cerr << "Pre barcode collection: " << m_reads.size() << std::endl;
 
   // Barcode frequency in assembly window
   std::cerr << std::endl;
@@ -34,12 +37,14 @@ size_t LocalAssemblyWindow::retrieveGenomewideReads() {
   }
   std::cerr << "Sum " << total << std::endl;
 
-  m_reads = m_bx_bam.fetchReadsByBxBarcode(barcodes);
+  // add the genome wide reads to assembly
+  BamReadVector genomewide_reads = m_bx_bam.fetchReadsByBxBarcode(barcodes);
+  std::copy(genomewide_reads.begin(), genomewide_reads.end(), std::back_inserter(m_reads));
+  std::cerr << "Post barcode collection: " << m_reads.size() << std::endl;
   return m_reads.size();
 }
 
 size_t LocalAssemblyWindow::assembleReads() {
-  // TODO: Add inexact read overlap by learning read parameters
   retrieveGenomewideReads();
   createReadTable();
   // forward suffix index
@@ -57,7 +62,7 @@ size_t LocalAssemblyWindow::assembleReads() {
   suffix_array_f.writeIndex();
   suffix_array_r.writeIndex();
 
-  // TODO: Add read deduplication. Necessary for read overlap to work.
+  // TODO: learn read overlap parameters. 
 
   OverlapAlgorithm overlapper(&BWT_f, &BWT_r, m_params.error_rate,
                               m_params.seed_length, m_params.seed_stride,
@@ -124,14 +129,15 @@ size_t LocalAssemblyWindow::assembleReads() {
     }
   }
 
-  // dump assembly graph to file
+  // dump raw overlap graph to file
   std::ofstream asqg_file_writer;
   asqg_file_writer.open(m_prefix + "graph.asqg");
   asqg_file_writer << asqg_writer.str();
   asqg_file_writer.close();
 
-  // now retrieve sequences from the graph
+  // pre-process the overlap graph, retrieve contigs
   assembleFromGraph(asqg_writer, exact);
+  sortContigs();
   return m_contigs.size();
 }
 
@@ -152,7 +158,6 @@ void LocalAssemblyWindow::assembleFromGraph(std::stringstream &asqg_stream,
   SGTrimVisitor trim_visitor(m_params.trim_length_threshold);
   SGContainRemoveVisitor contain_visitor;
   SGValidateStructureVisitor validate_visitor;
-  SGVisitorContig contig_visitor;
 
   // ?????
   while (str_graph->hasContainment())
@@ -162,7 +167,7 @@ void LocalAssemblyWindow::assembleFromGraph(std::stringstream &asqg_stream,
   if (m_params.perform_trim)
     str_graph->visit(trans_visitor);
 
-  str_graph->simplify(); // merges vertices that do not branch
+  str_graph->simplify(); // merges vertices by removing transitive edges
 
   if (m_params.validate)
     str_graph->visit(validate_visitor);
@@ -174,15 +179,18 @@ void LocalAssemblyWindow::assembleFromGraph(std::stringstream &asqg_stream,
   // identify these vertices with a unique prefix
   str_graph->renameVertices(m_prefix);
 
-  // walk contigs
-  str_graph->visit(contig_visitor);
-
-  // copy contigs from visitor into this object
-  m_contigs = contig_visitor.m_ct;
+  // walk graph to retrieve contigs
+  walkAssemblyGraph(str_graph);
 
   str_graph -> writeASQG(m_prefix + "pruned_graph.asqg");
   delete str_graph;
 }
+
+void LocalAssemblyWindow::walkAssemblyGraph(StringGraph *str_graph) {
+    // walk the connected components of the graph to retrieve the contigs
+
+}
+
 
 BxBarcodeCounts LocalAssemblyWindow::collectLocalBarcodes() {
   std::cerr << m_region.ToString(m_bam.Header()) << std::endl;
@@ -199,6 +207,8 @@ BxBarcodeCounts LocalAssemblyWindow::collectLocalBarcodes() {
     } else
       break;
   }
+  // Add these records to the assembly
+  m_reads = read_vector;
 
   std::cerr << "Local reads: " << read_vector.size() << std::endl;
   return BxBamWalker::collectBxBarcodes(read_vector);
@@ -252,6 +262,7 @@ void LocalAssemblyWindow::createReadTable() {
     SeqRecord read;
     read.id = sir.id;
     read.seq = sir.seq;
+    // check duplicate
     OverlapResult rr = dup_overlapper.alignReadDuplicate(read, &overlap_block);
 
     if (!rr.isSubstring)
@@ -259,3 +270,14 @@ void LocalAssemblyWindow::createReadTable() {
   }
   m_read_table = undup_read_table;
 }
+
+
+void LocalAssemblyWindow::sortContigs() {
+    // sort contigs in decreasing sequence length order
+    std::sort(m_contigs.begin(), m_contigs.end(),
+              [](SeqLib::UnalignedSequence &a, SeqLib::UnalignedSequence &b) {
+                  return a.Seq.length() > b.Seq.length();
+              });
+
+}
+
