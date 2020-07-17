@@ -60,6 +60,7 @@ int main(int argc, char **argv) {
     SeqLib::UnalignedSequenceVector test_seqs;
     test_seqs.push_back(insertion_seq);
     test_aln.align(test_seqs);
+    test_aln.writeAlignments(std::cerr);
     return 0;
   #endif
 
@@ -108,7 +109,7 @@ int main(int argc, char **argv) {
     local_win.writeContigs();
     LocalAlignment local_alignment(region.ChrName(bam_reader.Header()), region.pos1, region.pos2, ref_genome);
     local_alignment.align(local_win.getContigs());
-    local_alignment.writeAlignments();
+    local_alignment.writeAlignments(std::cerr);
   }
 
 

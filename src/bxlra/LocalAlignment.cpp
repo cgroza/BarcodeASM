@@ -26,48 +26,57 @@ void LocalAlignment::setupIndex(std::string target_sequence) {
   }
 
 LocalAlignment::~LocalAlignment() {
-    // free allocated memory
+    // free allocated memory 
     mm_idx_destroy(m_minimap_index);
     free(m_local_sequence);
+
+    for (auto &aln : m_alignments) {
+      for (int j = 0; j < aln.second.num_hits; ++j) 
+        free(aln.second.reg[j].p);
+      free(aln.second.reg);
+    }
 }
 
 void LocalAlignment::align(const SeqLib::UnalignedSequenceVector &seqs) {
   for (auto &seq : seqs) {
-    std::cerr << ">Query " << seq.Name.c_str() << " " << seq.Seq.c_str() << " "
-              << seq.Seq.length() << std::endl;
-    std::cerr << ">Target " << m_local_sequence << " " << m_minimap_index->seq->len << " "
-              << m_minimap_index->b << " " << m_minimap_index->w << " "
-              << m_minimap_index->k << " " << m_minimap_index->flag
-              << std::endl;
-
-    mm_reg1_t *reg;
-    int num_hits;
+    MinimapAlignment alignment;
     mm_tbuf_t *thread_buf = mm_tbuf_init();
 
-    reg = mm_map(m_minimap_index, seq.Seq.length(), seq.Seq.c_str(), &num_hits,
-                 thread_buf, &m_map_opt, seq.Name.c_str());
-
-    std::cerr << "Number of hits: " << num_hits << std::endl;
-    for (int j = 0; j < num_hits; ++j) { // traverse hits and print them out
-        std::cerr << "HIT: " << j << std::endl;
-      mm_reg1_t *r = &reg[j];
-      assert(r->p); // with MM_F_CIGAR, this should not be NULL
-      for (int i = 0; i < r->p->n_cigar; ++i)
-        std::cerr << (r->p->cigar[i] >> 4) << ("MIDNSH"[r->p->cigar[i] & 0xf]);
-      std::cerr << std::endl;
-      std::cerr << "Q: " << (r->qs) << " " << (r->qe) << std::endl;
-      std::cerr << "R: " << (r->rs) << " " << (r->re) << std::endl;
-      free(r->p);
-    }
-    std::cerr << std::endl;
-    free(reg);
+    alignment.reg = mm_map(m_minimap_index, seq.Seq.length(), seq.Seq.c_str(),
+                           &alignment.num_hits, thread_buf, &m_map_opt, seq.Name.c_str());
+    m_alignments[seq] = alignment;
     mm_tbuf_destroy(thread_buf);
   }
 }
 
-size_t LocalAlignment::writeAlignments() {
-    return m_local_alignments.size();
+size_t LocalAlignment::writeAlignments(std::ostream &out) {
+    for(auto &aln : m_alignments) {
+        int num_hits = aln.second.num_hits;
+        mm_reg1_t* reg = aln.second.reg;
+        SeqLib::UnalignedSequence seq = aln.first;
+
+        out << ">Query " << seq.Name.c_str() << " " << seq.Seq.c_str()
+                  << " " << seq.Seq.length() << std::endl;
+        out << ">Target " << m_local_sequence << " "
+                  << m_minimap_index->seq->len << " " << m_minimap_index->b
+                  << " " << m_minimap_index->w << " " << m_minimap_index->k
+                  << " " << m_minimap_index->flag << std::endl;
+
+        out << "Number of hits: " << num_hits << std::endl;
+        for (int j = 0; j < num_hits; ++j) { // traverse hits and print them out
+            out << "HIT: " << j << std::endl;
+            mm_reg1_t *r = &reg[j];
+            assert(r->p); // with MM_F_CIGAR, this should not be NULL
+            for (int i = 0; i < r->p->n_cigar; ++i)
+                out << (r->p->cigar[i] >> 4) << ("MIDNSH"[r->p->cigar[i] & 0xf]);
+
+            out << std::endl;
+            out << "Q: " << (r->qs) << " " << (r->qe) << std::endl;
+            out << "R: " << (r->rs) << " " << (r->re) << std::endl;
+            out << std::endl;
+      }
+  }
+  return m_alignments.size();
 }
 
 // TODO: extend the local alignment window since contigs sometimes go beyond it.
-// TODO: test insertion calling by aligning the reference sequence with an artificial insertion
