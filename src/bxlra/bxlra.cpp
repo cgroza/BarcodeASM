@@ -98,7 +98,8 @@ int main(int argc, char **argv) {
   bam_reader.Open(opt::bam_path);
   RegionFileReader region_reader(opt::regions_path, bam_reader.Header());
 
-  std::vector<std::future<std::pair<LocalAssemblyWindow, LocalAlignment>>*> output;
+  // std::vector<std::future<std::pair<LocalAssemblyWindow, LocalAlignment>>*> output;
+
   for (auto region : region_reader.getRegions()) {
       auto future = thread_pool.push([region](int id) {
 
@@ -124,7 +125,7 @@ int main(int argc, char **argv) {
       return std::pair<LocalAssemblyWindow, LocalAlignment>(local_win, local_alignment);
     });
 
-      output.push_back(&future);
+      // output.push_back(&future);
   }
   // for(auto& val : output)
   //     val -> get();
