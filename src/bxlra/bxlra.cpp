@@ -99,7 +99,7 @@ int main(int argc, char **argv) {
   RegionFileReader region_reader(opt::regions_path, bam_reader.Header());
 
   std::vector<std::future<std::pair<LocalAssemblyWindow, LocalAlignment>>*> output;
-  for (auto &region : region_reader.getRegions()) {
+  for (auto region : region_reader.getRegions()) {
       auto future = thread_pool.push([region](int id) {
 
       SeqLib::RefGenome ref_genome;
