@@ -98,30 +98,33 @@ int main(int argc, char **argv) {
   bam_reader.Open(opt::bam_path);
   RegionFileReader region_reader(opt::regions_path, bam_reader.Header());
 
-  SeqLib::RefGenome ref_genome;
-  bool load_ref = ref_genome.LoadIndex(opt::reference_path);
-  std::cerr << "Loaded " << opt::reference_path << ": " << load_ref
-            << std::endl;
-
-  BxBamWalker bx_bam_walker = BxBamWalker(opt::bx_bam_path, "0000", opt::weird_reads_only);
+  // std::vector<std::future<std::pair<LocalAssemblyWindow, LocalAlignment>>*> output;
 
   for (auto region : region_reader.getRegions()) {
-      auto future = thread_pool.push([region, ref_genome, bam_reader, bx_bam_walker](int id) {
+      auto future = thread_pool.push([region](int id) {
 
+      std::cerr << "ID " << id << std::endl;
+      SeqLib::RefGenome ref_genome;
+      bool load_ref = ref_genome.LoadIndex(opt::reference_path);
+      std::cerr << "Loaded " << opt::reference_path << ": " << load_ref << std::endl;
 
-      LocalAssemblyWindow* local_win = new LocalAssemblyWindow(region, bam_reader, bx_bam_walker);
+      SeqLib::BamReader thread_bam_reader;
+      thread_bam_reader.Open(opt::bam_path);
+
+      BxBamWalker thread_bx_bam_walker(opt::bx_bam_path, "0000", opt::weird_reads_only);
+
+      LocalAssemblyWindow *local_win = new LocalAssemblyWindow(region, thread_bam_reader, thread_bx_bam_walker);
 
       local_win -> assembleReads();
       std::cerr << "Reads: " << local_win -> getReads().size() << std::endl;
       std::cerr << "Contigs: " << local_win -> getContigs().size() << std::endl;
       local_win -> writeContigs();
-      LocalAlignment* local_alignment = new LocalAlignment(region.ChrName(bam_reader.Header()),
-                                                           region.pos1, region.pos2, ref_genome);
+      LocalAlignment *local_alignment = new LocalAlignment(region.ChrName(thread_bam_reader.Header()),
+                                                        region.pos1, region.pos2, ref_genome);
       local_alignment -> align(local_win -> getContigs());
       local_alignment -> writeAlignments(std::cerr);
       return std::pair<LocalAssemblyWindow*, LocalAlignment*>(local_win, local_alignment);
     });
-
   }
 
   thread_pool.stop(true);
