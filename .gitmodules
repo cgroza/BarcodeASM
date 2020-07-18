@@ -2,3 +2,7 @@
 	path = SeqLib
 	url = git@github.com:walaj/SeqLib.git
 	branch = master
+[submodule "minimap2"]
+	path = minimap2
+	url = git@github.com:lh3/minimap2.git
+	branch = master
