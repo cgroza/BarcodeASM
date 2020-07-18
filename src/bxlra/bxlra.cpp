@@ -121,8 +121,8 @@ int main(int argc, char **argv) {
       LocalAlignment local_alignment(region.ChrName(thread_bam_reader.Header()),
                                      region.pos1, region.pos2, ref_genome);
       local_alignment.align(local_win.getContigs());
-      // local_alignment.writeAlignments(std::cerr);
-      return std::pair<LocalAssemblyWindow, LocalAlignment>(local_win, local_alignment);
+      local_alignment.writeAlignments(std::cerr);
+      // return std::pair<LocalAssemblyWindow, LocalAlignment>(local_win, local_alignment);
     });
 
       // output.push_back(&future);
