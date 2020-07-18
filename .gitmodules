@@ -6,3 +6,7 @@
 	path = minimap2
 	url = git@github.com:lh3/minimap2.git
 	branch = master
+[submodule "sga"]
+	path = sga
+	url = https://github.com/jts/sga.git
+	branch = master
