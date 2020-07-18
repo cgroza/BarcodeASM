@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <iostream>
 #include <iterator>
+#include <mutex>
 #include <unistd.h>
 #include <vector>
 #include <future>
@@ -92,41 +93,61 @@ int main(int argc, char **argv) {
 
   opt::num_threads = 4;
 
+  // Storage for thread pooled resources
+  // These not be guarded by mutex, since they assigned to individual thread IDs
+  std::vector<SeqLib::BamReader*> bam_readers(opt::num_threads);
+  std::vector<BxBamWalker*> bx_bam_walkers(opt::num_threads);
+  std::vector<SeqLib::RefGenome*> ref_genomes(opt::num_threads);
+
+  // initialize pooled bam, bx_bam, and genome readers
+  for(size_t i = 0; i < opt::num_threads; i++) {
+    // one reference genome reader for each thread
+    SeqLib::RefGenome *ref_genome = new SeqLib::RefGenome();
+    bool load_ref = ref_genome -> LoadIndex(opt::reference_path);
+    std::cerr << "Loaded " << opt::reference_path << ": " << load_ref << std::endl;
+    ref_genomes.push_back(ref_genome);
+
+    // one BamReader for each thread
+    SeqLib::BamReader *bam_reader = new SeqLib::BamReader();
+    bam_reader -> Open(opt::bam_path);
+    bam_readers.push_back(bam_reader);
+
+    // and one BX_BamReader for each thread
+    BxBamWalker *bx_bam_walker = new BxBamWalker(opt::bx_bam_path, "0000", opt::weird_reads_only);
+    bx_bam_walkers.push_back(bx_bam_walker);
+  }
+
+  // Thread pool to run all the regions
   ctpl::thread_pool thread_pool(opt::num_threads);
 
-  SeqLib::BamReader bam_reader = SeqLib::BamReader();
-  bam_reader.Open(opt::bam_path);
-  RegionFileReader region_reader(opt::regions_path, bam_reader.Header());
+  // Regions to be locally assembled
+  RegionFileReader region_reader(opt::regions_path, bam_readers[0]->Header());
 
-  // std::vector<std::future<std::pair<LocalAssemblyWindow, LocalAlignment>>*> output;
+  // Stores output from each thread, must be protected by mutex
+  std::vector<std::pair<LocalAssemblyWindow*, LocalAlignment*>> output;
+  std::mutex output_mutex;
 
   for (auto region : region_reader.getRegions()) {
-      auto future = thread_pool.push([region](int id) {
+      auto future = thread_pool.push([region, &output, &output_mutex, ref_genomes, bam_readers, bx_bam_walkers](int id) {
 
       std::cerr << "ID " << id << std::endl;
-      SeqLib::RefGenome ref_genome;
-      bool load_ref = ref_genome.LoadIndex(opt::reference_path);
-      std::cerr << "Loaded " << opt::reference_path << ": " << load_ref << std::endl;
 
-      SeqLib::BamReader thread_bam_reader;
-      thread_bam_reader.Open(opt::bam_path);
-
-      BxBamWalker thread_bx_bam_walker(opt::bx_bam_path, "0000", opt::weird_reads_only);
-
-      LocalAssemblyWindow *local_win = new LocalAssemblyWindow(region, thread_bam_reader, thread_bx_bam_walker);
+      LocalAssemblyWindow *local_win = new LocalAssemblyWindow(region, *bam_readers[id], *bx_bam_walkers[id]);
 
       local_win -> assembleReads();
       std::cerr << "Reads: " << local_win -> getReads().size() << std::endl;
       std::cerr << "Contigs: " << local_win -> getContigs().size() << std::endl;
       local_win -> writeContigs();
-      LocalAlignment *local_alignment = new LocalAlignment(region.ChrName(thread_bam_reader.Header()),
-                                                        region.pos1, region.pos2, ref_genome);
+      LocalAlignment *local_alignment = new LocalAlignment(region.ChrName(bam_readers[id] -> Header()),
+                                                           region.pos1, region.pos2, *ref_genomes[id]);
       local_alignment -> align(local_win -> getContigs());
       local_alignment -> writeAlignments(std::cerr);
-      return std::pair<LocalAssemblyWindow*, LocalAlignment*>(local_win, local_alignment);
+      // MUTEX: only one thread must push to std::vector
+      output_mutex.lock();
+      output.push_back(std::pair<LocalAssemblyWindow*, LocalAlignment*>(local_win, local_alignment));
+      output_mutex.unlock();
     });
   }
 
   thread_pool.stop(true);
-  bam_reader.Close();
 }
