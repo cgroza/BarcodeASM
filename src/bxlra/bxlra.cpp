@@ -125,4 +125,5 @@ int main(int argc, char **argv) {
   }
   // for(auto& val : output)
   //     val -> get();
+  thread_pool.stop(true);
 }
