@@ -123,6 +123,6 @@ int main(int argc, char **argv) {
 
       output.push_back(&future);
   }
-  for(auto& val : output)
-      val -> get();
+  // for(auto& val : output)
+  //     val -> get();
 }
