@@ -1,7 +1,4 @@
 #include "BxBamWalker.h"
-#include <iostream>
-#include <stdexcept>
-#include <system_error>
 
 BxBamWalker::BxBamWalker(const std::string &bx_bam_path,
                          const std::string _prefix,

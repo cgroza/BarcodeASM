@@ -2,23 +2,29 @@
 #define LOCAL_ASSEMBLY_WINDOW_H
 
 #include "ASQG.h"
+#include "BxBamWalker.h"
+#include "CorrectionThresholds.h"
+#include "EncodedString.h"
+#include "OverlapAlgorithm.h"
 #include "OverlapCommon.h"
+#include "RLBWT.h"
 #include "ReadTable.h"
 #include "SGACommon.h"
-#include "SeqLib/UnalignedSequence.h"
-#include "overlap.h"
+#include "SGSearch.h"
 #include "SGUtil.h"
 #include "SGVisitors.h"
-#include "EncodedString.h"
-#include "Util.h"
-#include "SGSearch.h"
-#include "CorrectionThresholds.h"
-
 #include "SeqLib/BamReader.h"
 #include "SeqLib/GenomicRegion.h"
-
-#include "BxBamWalker.h"
+#include "SeqLib/SeqLibUtils.h"
+#include "SeqLib/UnalignedSequence.h"
+#include "SuffixArray.h"
+#include "Util.h"
+#include "overlap.h"
+#include <algorithm>
+#include <fstream>
+#include <iterator>
 #include <sstream>
+#include <string>
 
 struct AssemblyParams {
     double error_rate = 0;

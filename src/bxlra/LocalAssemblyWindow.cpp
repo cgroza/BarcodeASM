@@ -1,18 +1,4 @@
 #include "LocalAssemblyWindow.h"
-#include "ASQG.h"
-#include "BxBamWalker.h"
-#include "OverlapAlgorithm.h"
-#include "RLBWT.h"
-#include "SGUtil.h"
-#include "SeqLib/SeqLibUtils.h"
-#include "SeqLib/UnalignedSequence.h"
-#include "SuffixArray.h"
-#include "Util.h"
-#include <algorithm>
-#include <fstream>
-#include <iterator>
-#include <sstream>
-#include <string>
 
 LocalAssemblyWindow::LocalAssemblyWindow(SeqLib::GenomicRegion region,
                                          SeqLib::BamReader &bam,

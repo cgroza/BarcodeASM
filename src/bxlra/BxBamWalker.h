@@ -6,12 +6,14 @@
 #include "SeqLib/BamRecord.h"
 #include "SeqLib/GenomicRegion.h"
 #include <algorithm>
-#include <unordered_map>
-#include <set>
-#include <string>
-#include <vector>
-#include <iostream>
 #include <exception>
+#include <iostream>
+#include <set>
+#include <stdexcept>
+#include <string>
+#include <system_error>
+#include <unordered_map>
+#include <vector>
 
 /* Let's distinguish regular strings from BxBarcodes in the source code */
 typedef std::string BxBarcode;

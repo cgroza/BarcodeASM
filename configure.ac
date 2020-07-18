@@ -43,13 +43,13 @@ AC_CHECK_HEADERS([ \
 
 AC_CONFIG_FILES([Makefile
                 SeqLib/src/Makefile
-                sga/src/Util/Makefile
-                sga/src/SQG/Makefile
-                sga/src/Bigraph/Makefile
-                sga/src/Algorithm/Makefile
-                sga/src/StringGraph/Makefile
-                sga/src/SuffixTools/Makefile
-                sga/src/SGA/Makefile
+                src/SGA/Util/Makefile
+                src/SGA/SQG/Makefile
+                src/SGA/Bigraph/Makefile
+                src/SGA/Algorithm/Makefile
+                src/SGA/StringGraph/Makefile
+                src/SGA/SuffixTools/Makefile
+                src/SGA/SGA/Makefile
                 src/bxlra/Makefile])
 
 AC_OUTPUT
