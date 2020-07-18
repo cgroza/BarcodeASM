@@ -105,16 +105,16 @@ int main(int argc, char **argv) {
     SeqLib::RefGenome *ref_genome = new SeqLib::RefGenome();
     bool load_ref = ref_genome -> LoadIndex(opt::reference_path);
     std::cerr << "Loaded " << opt::reference_path << ": " << load_ref << std::endl;
-    ref_genomes.push_back(ref_genome);
+    ref_genomes[i] = ref_genome;
 
     // one BamReader for each thread
     SeqLib::BamReader *bam_reader = new SeqLib::BamReader();
     bam_reader -> Open(opt::bam_path);
-    bam_readers.push_back(bam_reader);
+    bam_readers[i] = bam_reader;
 
     // and one BX_BamReader for each thread
     BxBamWalker *bx_bam_walker = new BxBamWalker(opt::bx_bam_path, "0000", opt::weird_reads_only);
-    bx_bam_walkers.push_back(bx_bam_walker);
+    bx_bam_walkers[i] = bx_bam_walker;
   }
 
   // Thread pool to run all the regions
@@ -128,7 +128,7 @@ int main(int argc, char **argv) {
   std::mutex output_mutex;
 
   for (auto region : region_reader.getRegions()) {
-      auto future = thread_pool.push([region, &output, &output_mutex, ref_genomes, bam_readers, bx_bam_walkers](int id) {
+      auto future = thread_pool.push([region, &output, &output_mutex, &ref_genomes, &bam_readers, &bx_bam_walkers](int id) {
 
       std::cerr << "ID " << id << std::endl;
 
