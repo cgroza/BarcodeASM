@@ -1,15 +1,17 @@
 #include "BxBamWalker.h"
+#include "CTPL/ctpl_stl.h"
+#include "LocalAlignment.h"
 #include "LocalAssemblyWindow.h"
 #include "RegionFileReader.h"
 #include "SeqLib/BamRecord.h"
 #include "SeqLib/RefGenome.h"
-#include "LocalAlignment.h"
 #include "SeqLib/UnalignedSequence.h"
 #include <algorithm>
 #include <iostream>
 #include <iterator>
 #include <unistd.h>
-
+#include <vector>
+#include <future>
 
 #ifdef DEBUG_MINIMAP
 std::string ref("GTCAAAGTAAAGAAAACAAAACGAATCAAAATCCCTGTGCGTTTTCCAGTGAGCTGTAGCCAAGCCGAGTGAATTTTCTGTCTCTTGAATTCTAGGTGCTGAGAACTGATTGGCATCATCATCTTTTGAGAAATTAAACTTTAGTCATA"
@@ -48,6 +50,7 @@ std::string bam_path;
 std::string bx_bam_path;
 std::string regions_path;
 std::string reference_path;
+size_t num_threads = 1;
 bool weird_reads_only = true;
 } // namespace opt
 
@@ -87,7 +90,9 @@ int main(int argc, char **argv) {
       abort();
     }
 
+  opt::num_threads = 4;
 
+  ctpl::thread_pool thread_pool(opt::num_threads);
 
   SeqLib::BamReader bam_reader = SeqLib::BamReader();
   bam_reader.Open(opt::bam_path);
@@ -100,17 +105,24 @@ int main(int argc, char **argv) {
   bool load_ref = ref_genome.LoadIndex(opt::reference_path);
   std::cerr << "Loaded " << opt::reference_path << ": " << load_ref << std::endl;
 
+  std::vector<std::future<std::pair<LocalAssemblyWindow, LocalAlignment>>*> output;
   for (auto &region : region_reader.getRegions()) {
-    LocalAssemblyWindow local_win(region, bam_reader, bx_bam_walker);
-    // std::cerr << local_win.retrieveGenomewideReads() << std::endl;
-    local_win.assembleReads();
-    std::cerr << "Reads: " << local_win.getReads().size() << std::endl;
-    std::cerr << "Contigs: " << local_win.getContigs().size() << std::endl;
-    local_win.writeContigs();
-    LocalAlignment local_alignment(region.ChrName(bam_reader.Header()), region.pos1, region.pos2, ref_genome);
-    local_alignment.align(local_win.getContigs());
-    local_alignment.writeAlignments(std::cerr);
+      auto future =
+          thread_pool.push([bam_reader, region, bx_bam_walker, ref_genome](int id) {
+                               LocalAssemblyWindow local_win(region, bam_reader, bx_bam_walker);
+      local_win.assembleReads();
+      std::cerr << "Reads: " << local_win.getReads().size() << std::endl;
+      std::cerr << "Contigs: " << local_win.getContigs().size() << std::endl;
+      local_win.writeContigs();
+      LocalAlignment local_alignment(region.ChrName(bam_reader.Header()),
+                                     region.pos1, region.pos2, ref_genome);
+      local_alignment.align(local_win.getContigs());
+      local_alignment.writeAlignments(std::cerr);
+      return std::pair<LocalAssemblyWindow, LocalAlignment>(local_win, local_alignment);
+    });
+
+      output.push_back(&future);
   }
-
-
+  for(auto& val : output)
+      val -> get();
 }

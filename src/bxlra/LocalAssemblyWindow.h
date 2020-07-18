@@ -45,7 +45,7 @@ struct AssemblyParams {
 class LocalAssemblyWindow {
 
 public:
-    LocalAssemblyWindow(SeqLib::GenomicRegion region, SeqLib::BamReader& bam, BxBamWalker& bx_bam);
+    LocalAssemblyWindow(SeqLib::GenomicRegion region, SeqLib::BamReader bam, BxBamWalker bx_bam);
     size_t retrieveGenomewideReads();
     size_t assembleReads();
     BxBarcodeCounts collectLocalBarcodes();

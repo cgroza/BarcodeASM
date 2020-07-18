@@ -1,8 +1,8 @@
 #include "LocalAssemblyWindow.h"
 
 LocalAssemblyWindow::LocalAssemblyWindow(SeqLib::GenomicRegion region,
-                                         SeqLib::BamReader &bam,
-                                         BxBamWalker &bx_bam)
+                                         SeqLib::BamReader bam,
+                                         BxBamWalker bx_bam)
     : m_region(region), m_bam(bam), m_bx_bam(bx_bam) {
 
   std::stringstream prefix_ss;

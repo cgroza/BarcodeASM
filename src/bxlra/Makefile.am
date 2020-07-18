@@ -1,6 +1,7 @@
 bin_PROGRAMS = bxlra
 
 bxlra_CPPFLAGS = \
+	-I$(top_srcdir)/CTPL \
 	-I$(top_srcdir)/src/SGA/Util \
 	-I$(top_srcdir)/src/SGA/Bigraph \
 	-I$(top_srcdir)/src/SGA/SuffixTools \

@@ -10,3 +10,7 @@
 	path = sga
 	url = https://github.com/jts/sga.git
 	branch = master
+[submodule "CTPL"]
+	path = CTPL
+	url = https://github.com/vit-vit/CTPL.git
+	branch = master
