@@ -7,9 +7,11 @@
 #include "SeqLib/RefGenome.h"
 #include "SeqLib/UnalignedSequence.h"
 #include <algorithm>
+#include <cstdlib>
 #include <iostream>
 #include <iterator>
 #include <mutex>
+#include <stdexcept>
 #include <unistd.h>
 #include <vector>
 #include <future>
@@ -70,8 +72,17 @@ int main(int argc, char **argv) {
 
   opterr = 0;
   int c;
-  while ((c = getopt(argc, argv, "ab:B:r:g:")) != -1)
+  while ((c = getopt(argc, argv, "at:b:B:r:g:")) != -1)
     switch (c) {
+    case 't':
+        try {
+            opt::num_threads = std::stoi(optarg);
+        }
+        catch(std::invalid_argument){
+            std::cerr << "Number of threads -t must be integer!" << std::endl;
+            return -1;
+        }
+        break;
     case 'b':
       opt::bam_path = optarg;
       break;
@@ -90,8 +101,6 @@ int main(int argc, char **argv) {
     default:
       abort();
     }
-
-  opt::num_threads = 4;
 
   // Storage for thread pooled resources
   // These not be guarded by mutex, since they assigned to individual thread IDs
