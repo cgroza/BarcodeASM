@@ -150,7 +150,6 @@ int main(int argc, char **argv) {
       LocalAlignment *local_alignment = new LocalAlignment(region.ChrName(bam_readers[id] -> Header()),
                                                            region.pos1, region.pos2, *ref_genomes[id]);
       local_alignment -> align(local_win -> getContigs());
-      local_alignment -> writeAlignments(std::cerr);
       // MUTEX: only one thread must push to std::vector
       output_mutex.lock();
       output.push_back(std::pair<LocalAssemblyWindow*, LocalAlignment*>(local_win, local_alignment));
@@ -158,5 +157,16 @@ int main(int argc, char **argv) {
     });
   }
 
+  // output alignments
+  for(auto& region_output : output)
+    region_output.second -> writeAlignments(std::cerr);
+
+  // cleanup allocated memory
+  for (auto &region_output : output) {
+      delete region_output.first;
+      delete region_output.second;
+  }
+
+  output.clear();
   thread_pool.stop(true);
 }
