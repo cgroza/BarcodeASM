@@ -157,6 +157,8 @@ int main(int argc, char **argv) {
     });
   }
 
+  thread_pool.stop(true);
+
   // output alignments
   for(auto& region_output : output)
     region_output.second -> writeAlignments(std::cerr);
@@ -168,5 +170,4 @@ int main(int argc, char **argv) {
   }
 
   output.clear();
-  thread_pool.stop(true);
 }
