@@ -54,7 +54,7 @@ std::string bam_path;
 std::string bx_bam_path;
 std::string regions_path;
 std::string reference_path;
-size_t min_overlap;
+size_t min_overlap = 90;
 size_t num_threads = 1;
 bool weird_reads_only = true;
 } // namespace opt
