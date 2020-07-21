@@ -61,7 +61,7 @@ int main(int argc, char **argv) {
 
   #ifdef DEBUG_MINIMAP
     std::cerr << "DEBUG_MINIMAP" << std::endl;
-    LocalAlignment test_aln(ref);
+    LocalAlignment test_aln(ref, "test");
     SeqLib::UnalignedSequence insertion_seq("insertion", seq);
     SeqLib::UnalignedSequenceVector test_seqs;
     test_seqs.push_back(insertion_seq);

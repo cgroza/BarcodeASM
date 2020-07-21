@@ -7,10 +7,11 @@
 #include "SeqLib/RefGenome.h"
 #include "SeqLib/UnalignedSequence.h"
 #include "minimap2/minimap.h"
-#include <stdlib.h>
 #include <cstring>
-#include <unordered_map>
 #include <ostream>
+#include <stdlib.h>
+#include <unordered_map>
+#include <sstream>
 
 struct MinimapAlignment {
     mm_reg1_t* reg;
@@ -35,7 +36,7 @@ class LocalAlignment {
 public:
     LocalAlignment(std::string chr, size_t start, size_t end,
                    const SeqLib::RefGenome &genome);
-    LocalAlignment(std::string target_sequence);
+    LocalAlignment(std::string target_sequence, std::string target_name);
 
     ~LocalAlignment();
     void align(const SeqLib::UnalignedSequenceVector &seqs);
@@ -55,6 +56,8 @@ private:
     mm_mapopt_t m_map_opt;
 
     char *m_local_sequence;
+
+    std::string m_target_name;
 
     std::unordered_map<SeqLib::UnalignedSequence,
                        MinimapAlignment,

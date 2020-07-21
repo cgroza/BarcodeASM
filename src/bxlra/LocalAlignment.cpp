@@ -1,13 +1,19 @@
 #include "LocalAlignment.h"
+#include <sstream>
 
 LocalAlignment::LocalAlignment(std::string chr, size_t start, size_t end,
                                const SeqLib::RefGenome &genome)
 {
     std::string region = genome.QueryRegion(chr, start, end);
+    // identifier for the target aligned region
+    std::stringstream s;
+    s << chr << "_" << start << "_" << end;
+    m_target_name = s.str();
+
     setupIndex(region);
 }
 
-LocalAlignment::LocalAlignment(std::string target_sequence) {
+LocalAlignment::LocalAlignment(std::string target_sequence, std::string target_name) : m_target_name(target_name) {
   setupIndex(target_sequence);
 }
 
@@ -55,25 +61,28 @@ size_t LocalAlignment::writeAlignments(std::ostream &out) {
         mm_reg1_t* reg = aln.second.reg;
         SeqLib::UnalignedSequence seq = aln.first;
 
-        out << ">Query " << seq.Name.c_str() << " " << seq.Seq.c_str()
-                  << " " << seq.Seq.length() << std::endl;
-        out << ">Target " << m_local_sequence << " "
-                  << m_minimap_index->seq->len << " " << m_minimap_index->b
-                  << " " << m_minimap_index->w << " " << m_minimap_index->k
-                  << " " << m_minimap_index->flag << std::endl;
+        // Query name, query length, query start, query end
+        std::stringstream query_record;
+        // Target name, target length, target start, target end
+        std::stringstream target_record;
 
-        out << "Number of hits: " << num_hits << std::endl;
-        for (int j = 0; j < num_hits; ++j) { // traverse hits and print them out
-            out << "HIT: " << j << std::endl;
+        query_record << seq.Name.c_str() << " " << seq.Seq.length() << " ";
+
+        target_record << m_target_name << " " << m_minimap_index->seq->len << " ";
+
+        for (int j = 0; j < num_hits; ++j) { // traverse hits and inspect them
+            std::stringstream hit_record;
+            hit_record << j << " ";
             mm_reg1_t *r = &reg[j];
             assert(r->p); // with MM_F_CIGAR, this should not be NULL
             for (int i = 0; i < r->p->n_cigar; ++i)
-                out << (r->p->cigar[i] >> 4) << ("MIDNSH"[r->p->cigar[i] & 0xf]);
+                hit_record << (r->p->cigar[i] >> 4) << ("MIDNSH"[r->p->cigar[i] & 0xf]);
 
-            out << std::endl;
-            out << "Q: " << (r->qs) << " " << (r->qe) << std::endl;
-            out << "R: " << (r->rs) << " " << (r->re) << std::endl;
-            out << std::endl;
+            query_record << (r->qs) << " " << (r->qe) << " ";
+            target_record << (r->rs) << " " << (r->re) << " ";
+
+            // put together the alignment summary
+            out << target_record.str() << query_record.str() << hit_record.str();
       }
   }
   return m_alignments.size();
