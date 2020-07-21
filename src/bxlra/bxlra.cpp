@@ -54,6 +54,7 @@ std::string bam_path;
 std::string bx_bam_path;
 std::string regions_path;
 std::string reference_path;
+size_t min_overlap;
 size_t num_threads = 1;
 bool weird_reads_only = true;
 } // namespace opt
@@ -73,7 +74,7 @@ int main(int argc, char **argv) {
 
   opterr = 0;
   int c;
-  while ((c = getopt(argc, argv, "at:b:B:r:g:")) != -1)
+  while ((c = getopt(argc, argv, "at:b:B:r:g:o")) != -1)
     switch (c) {
     case 't':
         try {
@@ -99,9 +100,14 @@ int main(int argc, char **argv) {
     case 'g':
       opt::reference_path = optarg;
       break;
+    case 'o':
+      opt::min_overlap = std::stoi(optarg);
+      break;
     default:
       abort();
     }
+  AssemblyParams params;
+  params.min_overlap = opt::min_overlap;
 
   // Storage for thread pooled resources
   // These not be guarded by mutex, since they assigned to individual thread IDs
@@ -150,12 +156,12 @@ int main(int argc, char **argv) {
   for (auto region : region_reader.getRegions()) {
       auto future = thread_pool.push([region, &output, &output_mutex,
                                       &fasta, &fasta_mutex,
-                                      &alns, &alns_mutex,
+                                      &alns, &alns_mutex, &params,
                                       &ref_genomes, &bam_readers, &bx_bam_walkers](int id) {
 
       std::cerr << "ID " << id << std::endl;
 
-      LocalAssemblyWindow *local_win = new LocalAssemblyWindow(region, *bam_readers[id], *bx_bam_walkers[id]);
+      LocalAssemblyWindow *local_win = new LocalAssemblyWindow(region, *bam_readers[id], *bx_bam_walkers[id], params);
 
       local_win -> assembleReads();
       std::cerr << "Reads: " << local_win -> getReads().size() << std::endl;

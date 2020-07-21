@@ -2,8 +2,9 @@
 
 LocalAssemblyWindow::LocalAssemblyWindow(SeqLib::GenomicRegion region,
                                          SeqLib::BamReader bam,
-                                         BxBamWalker bx_bam)
-    : m_region(region), m_bam(bam), m_bx_bam(bx_bam) {
+                                         BxBamWalker bx_bam,
+                                         AssemblyParams params)
+    : m_region(region), m_bam(bam), m_bx_bam(bx_bam), m_params(params) {
 
   std::stringstream prefix_ss;
   prefix_ss << region.ChrName(bam.Header()) << "_" << region.pos1 << "_" << region.pos2;
@@ -151,16 +152,17 @@ void LocalAssemblyWindow::assembleFromGraph(std::stringstream &asqg_stream,
   // removes redundant paths from the graph
   str_graph->visit(trans_visitor);
 
-  // Remove branches that do not merge into to form a bubble
-  if (m_params.perform_trim) {
-    for (size_t i = 0; i < m_params.trim_rounds; i++)
-      str_graph->visit(trim_visitor);
-  }
 
   str_graph->simplify(); // merges vertices by removing transitive edges
 
   if (m_params.validate)
     str_graph->visit(validate_visitor);
+
+  // Remove branches that do not merge into to form a bubble
+  if (m_params.perform_trim) {
+    for (size_t i = 0; i < m_params.trim_rounds; i++)
+      str_graph->visit(trim_visitor);
+  }
 
   // identify these vertices with a unique prefix
   str_graph->renameVertices(m_prefix + "_");

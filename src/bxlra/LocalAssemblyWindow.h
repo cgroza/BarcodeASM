@@ -46,7 +46,7 @@ struct AssemblyParams {
 class LocalAssemblyWindow {
 
 public:
-    LocalAssemblyWindow(SeqLib::GenomicRegion region, SeqLib::BamReader bam, BxBamWalker bx_bam);
+    LocalAssemblyWindow(SeqLib::GenomicRegion region, SeqLib::BamReader bam, BxBamWalker bx_bam, AssemblyParams params);
     size_t retrieveGenomewideReads();
     size_t assembleReads();
     BxBarcodeCounts collectLocalBarcodes();
@@ -54,17 +54,18 @@ public:
     BamReadVector getReads() const;
     void writeContigs(std::ostream &out);
 
+
   private:
     void createReadTable();
     void assembleFromGraph(std::stringstream &asqg_stream, bool exact);
     void sortContigs();
     void walkAssemblyGraph(StringGraph *str_graph);
 
+    AssemblyParams m_params;
     SeqLib::GenomicRegion m_region;
     SeqLib::BamReader m_bam;
     BxBamWalker m_bx_bam;
     BamReadVector m_reads;
-    AssemblyParams m_params;
     ReadTable m_read_table;
     std::string m_prefix;
     SeqLib::UnalignedSequenceVector m_contigs;
