@@ -82,7 +82,7 @@ size_t LocalAlignment::writeAlignments(std::ostream &out) {
             target_record << (r->rs) << " " << (r->re) << " ";
 
             // put together the alignment summary
-            out << target_record.str() << query_record.str() << hit_record.str();
+            out << target_record.str() << query_record.str() << hit_record.str() << std::endl;
       }
   }
   return m_alignments.size();
