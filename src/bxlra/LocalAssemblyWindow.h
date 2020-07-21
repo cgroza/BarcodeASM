@@ -33,7 +33,7 @@ struct AssemblyParams {
     int seed_stride = 0;
     bool irr_only = true;
     bool get_components = true;
-    size_t min_overlap = 90;
+    size_t min_overlap = 45;
     bool perform_trim = true;
     size_t trim_length_threshold = 200;
     size_t trim_rounds = 1;
