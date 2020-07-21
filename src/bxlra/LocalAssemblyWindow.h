@@ -25,6 +25,7 @@
 #include <iterator>
 #include <sstream>
 #include <string>
+#include <ostream>
 
 struct AssemblyParams {
     double error_rate = 0;
@@ -51,7 +52,7 @@ public:
     BxBarcodeCounts collectLocalBarcodes();
     SeqLib::UnalignedSequenceVector getContigs() const;
     BamReadVector getReads() const;
-    void writeContigs();
+    void writeContigs(std::ostream &out);
 
   private:
     void createReadTable();

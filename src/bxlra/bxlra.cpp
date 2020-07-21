@@ -8,6 +8,7 @@
 #include "SeqLib/UnalignedSequence.h"
 #include <algorithm>
 #include <cstdlib>
+#include <fstream>
 #include <iostream>
 #include <iterator>
 #include <mutex>
@@ -136,8 +137,12 @@ int main(int argc, char **argv) {
   std::vector<std::pair<LocalAssemblyWindow*, LocalAlignment*>> output;
   std::mutex output_mutex;
 
+  // file to write contig sequences in
+  std::ofstream fasta("contigs.fa");
+  std::mutex fasta_mutex;
+
   for (auto region : region_reader.getRegions()) {
-      auto future = thread_pool.push([region, &output, &output_mutex, &ref_genomes, &bam_readers, &bx_bam_walkers](int id) {
+      auto future = thread_pool.push([region, &output, &output_mutex, &fasta, &fasta_mutex, &ref_genomes, &bam_readers, &bx_bam_walkers](int id) {
 
       std::cerr << "ID " << id << std::endl;
 
@@ -146,7 +151,12 @@ int main(int argc, char **argv) {
       local_win -> assembleReads();
       std::cerr << "Reads: " << local_win -> getReads().size() << std::endl;
       std::cerr << "Contigs: " << local_win -> getContigs().size() << std::endl;
-      local_win -> writeContigs();
+
+      // MUTEX: only one thread must write to the fasta file at a time
+      fasta_mutex.lock();
+      local_win -> writeContigs(fasta);
+      fasta_mutex.unlock();
+
       LocalAlignment *local_alignment = new LocalAlignment(region.ChrName(bam_readers[id] -> Header()),
                                                            region.pos1, region.pos2, *ref_genomes[id]);
       local_alignment -> align(local_win -> getContigs());
@@ -158,6 +168,7 @@ int main(int argc, char **argv) {
   }
 
   thread_pool.stop(true);
+  fasta.close();
 
   // output alignments
   std::cerr << LocalAlignment::getAlignmentHeader() << std::endl;

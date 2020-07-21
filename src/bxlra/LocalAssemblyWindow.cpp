@@ -331,11 +331,9 @@ void LocalAssemblyWindow::sortContigs() {
               });
 }
 
-void LocalAssemblyWindow::writeContigs() {
-    std::ofstream fasta(m_prefix + ".fasta");
+void LocalAssemblyWindow::writeContigs(std::ostream &out) {
     for(auto &contig : m_contigs) {
-        fasta << ">" << contig.Name << std::endl;
-        fasta << contig.Seq << std::endl;
+        out << ">" << contig.Name << std::endl;
+        out << contig.Seq << std::endl;
     }
-    fasta.close();
 }
