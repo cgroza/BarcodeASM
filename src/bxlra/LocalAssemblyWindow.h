@@ -35,7 +35,7 @@ struct AssemblyParams {
     bool get_components = true;
     size_t min_overlap = 90;
     bool perform_trim = true;
-    size_t trim_length_threshold = 160;
+    size_t trim_length_threshold = 200;
     size_t trim_rounds = 1;
     bool validate = true;
     size_t min_contig_length = 200;
