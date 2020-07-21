@@ -160,6 +160,7 @@ int main(int argc, char **argv) {
   thread_pool.stop(true);
 
   // output alignments
+  std::cerr << LocalAlignment::getAlignmentHeader() << std::endl;
   for(auto& region_output : output)
     region_output.second -> writeAlignments(std::cerr);
 
