@@ -141,8 +141,17 @@ int main(int argc, char **argv) {
   std::ofstream fasta("contigs.fa");
   std::mutex fasta_mutex;
 
+  // file to write alignments
+  std::ofstream alns("alignments.tsv");
+  std::mutex alns_mutex;
+  // output alignments
+  alns << LocalAlignment::getAlignmentHeader() << std::endl;
+
   for (auto region : region_reader.getRegions()) {
-      auto future = thread_pool.push([region, &output, &output_mutex, &fasta, &fasta_mutex, &ref_genomes, &bam_readers, &bx_bam_walkers](int id) {
+      auto future = thread_pool.push([region, &output, &output_mutex,
+                                      &fasta, &fasta_mutex,
+                                      &alns, &alns_mutex,
+                                      &ref_genomes, &bam_readers, &bx_bam_walkers](int id) {
 
       std::cerr << "ID " << id << std::endl;
 
@@ -160,6 +169,12 @@ int main(int argc, char **argv) {
       LocalAlignment *local_alignment = new LocalAlignment(region.ChrName(bam_readers[id] -> Header()),
                                                            region.pos1, region.pos2, *ref_genomes[id]);
       local_alignment -> align(local_win -> getContigs());
+
+      // MUTEX: only one thread must write to alignments
+      alns_mutex.lock();
+      local_alignment -> writeAlignments(alns);
+      alns_mutex.unlock();
+
       // MUTEX: only one thread must push to std::vector
       output_mutex.lock();
       output.push_back(std::pair<LocalAssemblyWindow*, LocalAlignment*>(local_win, local_alignment));
@@ -169,11 +184,7 @@ int main(int argc, char **argv) {
 
   thread_pool.stop(true);
   fasta.close();
-
-  // output alignments
-  std::cerr << LocalAlignment::getAlignmentHeader() << std::endl;
-  for(auto& region_output : output)
-    region_output.second -> writeAlignments(std::cerr);
+  alns.close();
 
   // cleanup allocated memory
   for (auto &region_output : output) {
