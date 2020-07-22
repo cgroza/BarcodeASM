@@ -74,7 +74,7 @@ int main(int argc, char **argv) {
 
   opterr = 0;
   int c;
-  while ((c = getopt(argc, argv, "at:b:B:r:g:o")) != -1)
+  while ((c = getopt(argc, argv, "at:b:B:r:g:o:")) != -1)
     switch (c) {
     case 't':
         try {
