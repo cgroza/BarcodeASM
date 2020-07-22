@@ -61,28 +61,33 @@ size_t LocalAlignment::writeAlignments(std::ostream &out) {
         mm_reg1_t* reg = aln.second.reg;
         SeqLib::UnalignedSequence seq = aln.first;
 
-        // Query name, query length, query start, query end
-        std::stringstream query_record;
-        // Target name, target length, target start, target end
-        std::stringstream target_record;
-
-        query_record << seq.Name.c_str() << " " << seq.Seq.length() << " ";
-
-        target_record << m_target_name << " " << m_minimap_index->seq->len << " ";
 
         for (int j = 0; j < num_hits; ++j) { // traverse hits and inspect them
-            std::stringstream hit_record;
-            hit_record << j << " ";
-            mm_reg1_t *r = &reg[j];
-            assert(r->p); // with MM_F_CIGAR, this should not be NULL
-            for (int i = 0; i < r->p->n_cigar; ++i)
-                hit_record << (r->p->cigar[i] >> 4) << ("MIDNSH"[r->p->cigar[i] & 0xf]);
+          // Query name, query length, query start, query end
+          std::stringstream query_record;
+          // Target name, target length, target start, target end
+          std::stringstream target_record;
+          // Data for the current hit
+          std::stringstream hit_record;
 
-            query_record << (r->qs) << " " << (r->qe) << " ";
-            target_record << (r->rs) << " " << (r->re) << " ";
+          query_record << seq.Name.c_str() << " " << seq.Seq.length() << " ";
 
-            // put together the alignment summary
-            out << target_record.str() << query_record.str() << hit_record.str() << std::endl;
+          target_record << m_target_name << " " << m_minimap_index->seq->len << " ";
+
+          hit_record << j << " ";
+
+          mm_reg1_t *r = &reg[j];
+          assert(r->p); // with MM_F_CIGAR, this should not be NULL
+          for (int i = 0; i < r->p->n_cigar; ++i)
+            hit_record << (r->p->cigar[i] >> 4)
+                       << ("MIDNSH"[r->p->cigar[i] & 0xf]);
+
+          query_record << (r->qs) << " " << (r->qe) << " ";
+          target_record << (r->rs) << " " << (r->re) << " ";
+
+          // put together the alignment summary
+          out << target_record.str() << query_record.str() << hit_record.str()
+              << std::endl;
       }
   }
   return m_alignments.size();
