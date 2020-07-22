@@ -4,7 +4,7 @@ LocalAssemblyWindow::LocalAssemblyWindow(SeqLib::GenomicRegion region,
                                          SeqLib::BamReader bam,
                                          BxBamWalker bx_bam,
                                          AssemblyParams params)
-    : m_region(region), m_bam(bam), m_bx_bam(bx_bam), m_params(params) {
+    : m_params(params), m_region(region), m_bam(bam), m_bx_bam(bx_bam) {
 
   std::stringstream prefix_ss;
   prefix_ss << region.ChrName(bam.Header()) << "_" << region.pos1 << "_" << region.pos2;
