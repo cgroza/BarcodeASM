@@ -111,8 +111,6 @@ size_t LocalAssemblyWindow::assembleReads() {
                                    total_entries, ov, is_substring);
 
     for (OverlapVector::iterator iter = ov.begin(); iter != ov.end(); ++iter) {
-      if(iter -> id[0] == iter -> id[1])
-          std::cerr << "Equal overlap IDs" << iter -> id[0] << " " << iter -> id[1] << std::endl;
       ASQG::EdgeRecord edge_record(*iter);
       edge_record.write(asqg_writer);
     }
