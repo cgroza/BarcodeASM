@@ -16,18 +16,18 @@ size_t LocalAssemblyWindow::retrieveGenomewideReads() {
   std::cerr << "Pre barcode collection: " << m_reads.size() << std::endl;
 
   // Barcode frequency in assembly window
-  std::cerr << std::endl;
+  // std::cerr << std::endl;
   size_t total = 0;
   for (const auto &b : barcodes) {
     std::cerr << b.first << " " << b.second << std::endl;
     total += b.second;
   }
-  std::cerr << "Sum " << total << std::endl;
+  // std::cerr << "Sum " << total << std::endl;
 
   // add the genome wide reads to assembly
   BamReadVector genomewide_reads = m_bx_bam.fetchReadsByBxBarcode(barcodes);
   std::copy(genomewide_reads.begin(), genomewide_reads.end(), std::back_inserter(m_reads));
-  std::cerr << "Post barcode collection: " << m_reads.size() << std::endl;
+  // std::cerr << "Post barcode collection: " << m_reads.size() << std::endl;
   return m_reads.size();
 }
 
@@ -192,7 +192,7 @@ void LocalAssemblyWindow::walkAssemblyGraph(StringGraph *str_graph) {
 
     for(size_t i = 0; i < components.size(); ++i)
     {
-        std::cerr << "Component " << i << ": " << components[i].size() << " vertices" << std::endl;
+        // std::cerr << "Component " << i << ": " << components[i].size() << " vertices" << std::endl;
         if(components[i].size() > largestSize)
         {
             selected_idx = i;
@@ -203,7 +203,7 @@ void LocalAssemblyWindow::walkAssemblyGraph(StringGraph *str_graph) {
     assert(selected_idx != -1);
     VertexPtrVec selected_component = components[selected_idx];
 
-    std::cerr << "component-walk: selected component of size " << selected_component.size() << std::endl;
+    // std::cerr << "component-walk: selected component of size " << selected_component.size() << std::endl;
 
     // Build a vector of the terminal vertices
     VertexPtrVec terminals;
@@ -217,7 +217,7 @@ void LocalAssemblyWindow::walkAssemblyGraph(StringGraph *str_graph) {
             terminals.push_back(vertex);
     }
 
-    std::cout << "selected component has " << terminals.size() << " terminal vertices" << std::endl;
+    // std::cout << "selected component has " << terminals.size() << " terminal vertices" << std::endl;
 
     // Find walks between all-pairs of terminal vertices
     SGWalkVector temp_walks;
