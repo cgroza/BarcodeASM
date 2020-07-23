@@ -341,6 +341,11 @@ void LocalAssemblyWindow::sortContigs() {
               });
 }
 
+void LocalAssemblyWindow::clearReads() {
+    m_reads.clear();
+    m_read_table.clear();
+}
+
 void LocalAssemblyWindow::writeContigs(std::ostream &out) {
     for(auto &contig : m_contigs) {
         out << ">" << contig.Name << std::endl;

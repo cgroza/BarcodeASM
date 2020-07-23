@@ -53,6 +53,7 @@ public:
     BxBarcodeCounts collectLocalBarcodes();
     SeqLib::UnalignedSequenceVector getContigs() const;
     BamReadVector getReads() const;
+    void clearReads();
     void writeContigs(std::ostream &out);
 
 

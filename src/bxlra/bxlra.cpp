@@ -165,6 +165,7 @@ int main(int argc, char **argv) {
       LocalAssemblyWindow *local_win = new LocalAssemblyWindow(region, *bam_readers[id], *bx_bam_walkers[id], params);
 
       local_win -> assembleReads();
+      local_win -> clearReads();
       std::cerr << "Reads: " << local_win -> getReads().size() << std::endl;
       std::cerr << "Contigs: " << local_win -> getContigs().size() << std::endl;
 
