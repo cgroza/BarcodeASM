@@ -204,7 +204,7 @@ bool SGAlgorithms::isOverlapTransitive(const Vertex* pY, const Vertex* pZ, const
     // assert(pY != pZ);
     if (pY == pZ)
         {
-            std::cerr << pY -> getStr() << " " << pZ -> getStr() << std::endl;
+            std::cerr << pY -> getID()  << " " << pY -> getStr() << " " << pZ -> getID() << " " << pZ -> getStr() << std::endl;
             assert(pY != pZ);
         }
 
