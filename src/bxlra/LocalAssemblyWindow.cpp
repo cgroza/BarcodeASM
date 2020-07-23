@@ -147,7 +147,7 @@ void LocalAssemblyWindow::assembleFromGraph(std::stringstream &asqg_stream,
   SGContainRemoveVisitor contain_visitor;
   SGValidateStructureVisitor validate_visitor;
   SGSuperRepeatVisitor super_repeat_visitor;
-  // SGSmallRepeatResolveVisitor small_repeat_resolve_visitor(m_params.min_repeat_size);
+  SGSmallRepeatResolveVisitor small_repeat_resolve_visitor(m_params.min_repeat_size);
 
   // remove vertices with repetitive sequence
   str_graph -> visit(super_repeat_visitor);
@@ -158,7 +158,7 @@ void LocalAssemblyWindow::assembleFromGraph(std::stringstream &asqg_stream,
   // removes redundant paths from the graph
   str_graph->visit(trans_visitor);
 
-  // str_graph -> visit(small_repeat_resolve_visitor);
+  str_graph -> visit(small_repeat_resolve_visitor);
 
   str_graph->simplify(); // merges vertices by merging runs of vertices
 
