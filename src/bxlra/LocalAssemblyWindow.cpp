@@ -112,7 +112,7 @@ size_t LocalAssemblyWindow::assembleReads() {
 
     for (OverlapVector::iterator iter = ov.begin(); iter != ov.end(); ++iter) {
       // Check if this is a self overlap
-      assert(iter -> id[0] != iter -> id[1]);
+      std::cerr << "Overlap IDs " << iter -> id[0] << " " << iter -> id[1];
       ASQG::EdgeRecord edge_record(*iter);
       edge_record.write(asqg_writer);
     }
