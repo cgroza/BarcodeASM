@@ -144,7 +144,10 @@ void LocalAssemblyWindow::assembleFromGraph(std::stringstream &asqg_stream,
   SGTrimVisitor trim_visitor(m_params.trim_length_threshold);
   SGContainRemoveVisitor contain_visitor;
   SGValidateStructureVisitor validate_visitor;
+  SGSuperRepeatVisitor super_repeat_visitor;
 
+  // remove vertices with repetitive sequence
+  str_graph -> visit(super_repeat_visitor);
   // ?????
   while (str_graph->hasContainment())
     str_graph->visit(contain_visitor);
