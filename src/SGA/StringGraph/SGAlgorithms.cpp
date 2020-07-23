@@ -201,10 +201,15 @@ bool SGAlgorithms::isOverlapTransitive(const Vertex* pY, const Vertex* pZ, const
     // Ensure the overlaps are in the correct order, the overlap with Y should be at least
     // as large as the overlap with Z
     assert(ovrXY.getOverlapLength(0) >= ovrXZ.getOverlapLength(0));
-    assert(pY != pZ);
+    // assert(pY != pZ);
+    if (pY != pZ)
+        {
+            std::cerr << pY -> getStr() << " " << pZ -> getStr() << std::endl;
+            assert(pY != pZ);
+        }
 
-    // Compute the overlap YZ
-    Overlap ovrYX = ovrXY;
+      // Compute the overlap YZ
+      Overlap ovrYX = ovrXY;
     ovrYX.swap();
     Overlap ovrYZ = SGAlgorithms::inferTransitiveOverlap(ovrYX, ovrXZ);
 
