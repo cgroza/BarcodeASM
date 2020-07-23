@@ -36,7 +36,7 @@ struct AssemblyParams {
     size_t min_overlap = 90;
     bool perform_trim = true;
     size_t trim_length_threshold = 200;
-    size_t trim_rounds = 1;
+    size_t trim_rounds = 3;
     bool validate = true;
     size_t min_contig_length = 200;
     size_t walk_max_distance = 100000;
