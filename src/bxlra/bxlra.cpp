@@ -162,7 +162,7 @@ int main(int argc, char **argv) {
       std::cerr << "ID " << id << std::endl;
 
       std::string chrom = region.ChrName(bam_readers[id]->Header());
-      std::cerr << "Running" << chrom <<  " " << region.pos1 << " " << region.pos2 << std::endl;
+      std::cerr << "Running " << chrom <<  " " << region.pos1 << " " << region.pos2 << std::endl;
 
       LocalAssemblyWindow *local_win = new LocalAssemblyWindow(region, *bam_readers[id], *bx_bam_walkers[id], params);
 
