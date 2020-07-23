@@ -40,6 +40,7 @@ struct AssemblyParams {
     bool validate = true;
     size_t min_contig_length = 200;
     size_t walk_max_distance = 100000;
+    size_t min_repeat_size = 3;
 };
 
 

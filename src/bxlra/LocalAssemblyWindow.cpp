@@ -112,7 +112,7 @@ size_t LocalAssemblyWindow::assembleReads() {
 
     for (OverlapVector::iterator iter = ov.begin(); iter != ov.end(); ++iter) {
       // Check if this is a self overlap
-      std::cerr << "Overlap IDs " << iter -> id[0] << " " << iter -> id[1];
+        // std::cerr << "Overlap IDs " << iter -> id[0] << " " << iter -> id[1] << " " ;
       ASQG::EdgeRecord edge_record(*iter);
       edge_record.write(asqg_writer);
     }
@@ -147,6 +147,7 @@ void LocalAssemblyWindow::assembleFromGraph(std::stringstream &asqg_stream,
   SGContainRemoveVisitor contain_visitor;
   SGValidateStructureVisitor validate_visitor;
   SGSuperRepeatVisitor super_repeat_visitor;
+  SGSmallRepeatResolveVisitor small_repeat_resolve_visitor(m_params.min_repeat_size);
 
   // remove vertices with repetitive sequence
   str_graph -> visit(super_repeat_visitor);
@@ -157,13 +158,14 @@ void LocalAssemblyWindow::assembleFromGraph(std::stringstream &asqg_stream,
   // removes redundant paths from the graph
   str_graph->visit(trans_visitor);
 
+  str_graph -> visit(small_repeat_resolve_visitor);
 
-  str_graph->simplify(); // merges vertices by removing transitive edges
+  str_graph->simplify(); // merges vertices by merging runs of vertices
 
   if (m_params.validate)
     str_graph->visit(validate_visitor);
 
-  // Remove branches that do not merge into to form a bubble
+  // Remove branches that do not merge back to form a bubble
   if (m_params.perform_trim) {
     for (size_t i = 0; i < m_params.trim_rounds; i++)
       str_graph->visit(trim_visitor);
