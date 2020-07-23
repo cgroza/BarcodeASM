@@ -161,6 +161,9 @@ int main(int argc, char **argv) {
 
       std::cerr << "ID " << id << std::endl;
 
+      std::string chrom = region.ChrName(bam_readers[id]->Header());
+      std::cerr << "Running" << chrom <<  " " << region.pos1 << " " << region.pos2 << std::endl;
+
       LocalAssemblyWindow *local_win = new LocalAssemblyWindow(region, *bam_readers[id], *bx_bam_walkers[id], params);
 
       local_win -> assembleReads();
@@ -172,8 +175,8 @@ int main(int argc, char **argv) {
       local_win -> writeContigs(fasta);
       fasta_mutex.unlock();
 
-      LocalAlignment *local_alignment = new LocalAlignment(region.ChrName(bam_readers[id] -> Header()),
-                                                           region.pos1, region.pos2, *ref_genomes[id]);
+      LocalAlignment *local_alignment = new LocalAlignment(chrom, region.pos1,
+                                                           region.pos2, *ref_genomes[id]);
       local_alignment -> align(local_win -> getContigs());
 
       // MUTEX: only one thread must write to alignments
