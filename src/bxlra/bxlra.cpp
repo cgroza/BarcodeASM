@@ -120,7 +120,7 @@ int main(int argc, char **argv) {
   params.trim_length_threshold = opt::min_branch_len;
   params.trim_rounds = opt::trim_rounds;
 
-  std::cerr << "o: " << params.min_overlap << " l: " << params.trim_length_threshold << "T: " << params.trim_rounds  << std::endl;
+  std::cerr << "o: " << params.min_overlap << " l: " << params.trim_length_threshold << " T: " << params.trim_rounds  << std::endl;
 
   // Storage for thread pooled resources
   // These not be guarded by mutex, since they assigned to individual thread IDs

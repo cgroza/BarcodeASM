@@ -1,25 +1,12 @@
 #ifndef LOCAL_ASSEMBLY_WINDOW_H
 #define LOCAL_ASSEMBLY_WINDOW_H
 
-#include "ASQG.h"
 #include "BxBamWalker.h"
-#include "CorrectionThresholds.h"
-#include "EncodedString.h"
-#include "OverlapAlgorithm.h"
-#include "OverlapCommon.h"
-#include "RLBWT.h"
-#include "ReadTable.h"
-#include "SGACommon.h"
-#include "SGSearch.h"
-#include "SGUtil.h"
-#include "SGVisitors.h"
 #include "SeqLib/BamReader.h"
 #include "SeqLib/GenomicRegion.h"
 #include "SeqLib/SeqLibUtils.h"
 #include "SeqLib/UnalignedSequence.h"
-#include "SuffixArray.h"
-#include "Util.h"
-#include "overlap.h"
+#include "SeqLib/FermiAssembler.h"
 #include <algorithm>
 #include <fstream>
 #include <iterator>
@@ -58,17 +45,13 @@ public:
 
 
   private:
-    void createReadTable();
-    void assembleFromGraph(std::stringstream &asqg_stream, bool exact);
     void sortContigs();
-    void walkAssemblyGraph(StringGraph *str_graph);
 
     AssemblyParams m_params;
     SeqLib::GenomicRegion m_region;
     SeqLib::BamReader m_bam;
     BxBamWalker m_bx_bam;
     BamReadVector m_reads;
-    ReadTable m_read_table;
     std::string m_prefix;
     SeqLib::UnalignedSequenceVector m_contigs;
 };
