@@ -127,6 +127,7 @@ size_t LocalAssemblyWindow::assembleReads() {
   // pre-process the overlap graph, retrieve contigs
   assembleFromGraph(asqg_writer, exact);
   sortContigs();
+  m_contigs.erase(m_contigs.begin() + 3);
   return m_contigs.size();
 }
 
