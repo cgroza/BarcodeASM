@@ -147,10 +147,10 @@ void LocalAssemblyWindow::assembleFromGraph(std::stringstream &asqg_stream,
   SGTrimVisitor trim_visitor(m_params.trim_length_threshold);
   SGContainRemoveVisitor contain_visitor;
   SGValidateStructureVisitor validate_visitor;
-  SGSuperRepeatVisitor super_repeat_visitor;
+  // SGSuperRepeatVisitor super_repeat_visitor;
 
   // remove vertices with repetitive sequence
-  str_graph -> visit(super_repeat_visitor);
+  // str_graph -> visit(super_repeat_visitor);
 
   // ?????
   while (str_graph->hasContainment())
@@ -159,11 +159,10 @@ void LocalAssemblyWindow::assembleFromGraph(std::stringstream &asqg_stream,
   // removes redundant paths from the graph
   str_graph->visit(trans_visitor);
 
+  str_graph -> simplify();
 
   if (m_params.validate)
     str_graph->visit(validate_visitor);
-
-  str_graph -> simplify();
 
   // Remove branches that do not merge back to form a bubble
   if (m_params.perform_trim) {
