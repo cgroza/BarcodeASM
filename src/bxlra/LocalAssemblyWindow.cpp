@@ -148,10 +148,10 @@ void LocalAssemblyWindow::assembleFromGraph(std::stringstream &asqg_stream,
   SGContainRemoveVisitor contain_visitor;
   SGValidateStructureVisitor validate_visitor;
   SGSuperRepeatVisitor super_repeat_visitor;
-  // SGSmallRepeatResolveVisitor small_repeat_resolve_visitor(m_params.min_repeat_size);
 
   // remove vertices with repetitive sequence
   str_graph -> visit(super_repeat_visitor);
+
   // ?????
   while (str_graph->hasContainment())
     str_graph->visit(contain_visitor);
@@ -159,20 +159,17 @@ void LocalAssemblyWindow::assembleFromGraph(std::stringstream &asqg_stream,
   // removes redundant paths from the graph
   str_graph->visit(trans_visitor);
 
-  // str_graph -> visit(small_repeat_resolve_visitor);
 
-  str_graph->simplify(); // merges vertices by merging runs of vertices
+  if (m_params.validate)
+    str_graph->visit(validate_visitor);
+
+  str_graph -> simplify();
 
   // Remove branches that do not merge back to form a bubble
   if (m_params.perform_trim) {
     for (size_t i = 0; i < m_params.trim_rounds; i++)
       str_graph->visit(trim_visitor);
   }
-
-  if (m_params.validate)
-    str_graph->visit(validate_visitor);
-
-  str_graph -> simplify();
   // identify these vertices with a unique prefix
   str_graph->renameVertices(m_prefix + "_");
 
