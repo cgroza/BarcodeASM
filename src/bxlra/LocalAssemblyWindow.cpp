@@ -171,7 +171,7 @@ void LocalAssemblyWindow::assembleFromGraph(std::stringstream &asqg_stream,
   if (m_params.validate)
     str_graph->visit(validate_visitor);
 
-
+  str_graph -> simplify();
   // identify these vertices with a unique prefix
   str_graph->renameVertices(m_prefix + "_");
 
