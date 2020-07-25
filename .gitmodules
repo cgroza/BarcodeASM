@@ -1,6 +1,6 @@
 [submodule "SeqLib"]
 	path = SeqLib
-	url = https://github.com/walaj/SeqLib.git
+	url = git@github.com:cgroza/SeqLib.git
 	branch = master
 [submodule "minimap2"]
 	path = minimap2
