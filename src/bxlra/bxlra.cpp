@@ -56,8 +56,6 @@ std::string regions_path;
 std::string reference_path;
 size_t min_overlap = 90;
 size_t num_threads = 1;
-size_t trim_rounds = 3;
-size_t min_branch_len;
 bool weird_reads_only = true;
 } // namespace opt
 
@@ -76,7 +74,7 @@ int main(int argc, char **argv) {
 
   opterr = 0;
   int c;
-  while ((c = getopt(argc, argv, "at:b:B:r:g:o:T:l:")) != -1)
+  while ((c = getopt(argc, argv, "at:b:B:r:g:o:")) != -1)
     switch (c) {
     case 't':
         try {
@@ -105,22 +103,13 @@ int main(int argc, char **argv) {
     case 'o':
       opt::min_overlap = std::stoi(optarg);
       break;
-    case 'l':
-      opt::min_branch_len = std::stoi(optarg);
-      break;
-    case 'T':
-      opt::trim_rounds = std::stoi(optarg);
-      break;
     default:
       abort();
     }
 
   AssemblyParams params;
   params.min_overlap = opt::min_overlap;
-  params.trim_length_threshold = opt::min_branch_len;
-  params.trim_rounds = opt::trim_rounds;
-
-  std::cerr << "o: " << params.min_overlap << " l: " << params.trim_length_threshold << " T: " << params.trim_rounds  << std::endl;
+  std::cerr << "Params o: " << params.min_overlap << std::endl;
 
   // Storage for thread pooled resources
   // These not be guarded by mutex, since they assigned to individual thread IDs
