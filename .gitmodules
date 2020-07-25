@@ -1,7 +1,3 @@
-[submodule "SeqLib"]
-	path = SeqLib
-	url = git@github.com:cgroza/SeqLib.git
-	branch = master
 [submodule "minimap2"]
 	path = minimap2
 	url = https://github.com/lh3/minimap2.git
@@ -14,3 +10,6 @@
 	path = CTPL
 	url = https://github.com/vit-vit/CTPL.git
 	branch = master
+[submodule "SeqLib"]
+	path = SeqLib
+	url = git@github.com:cgroza/SeqLib.git

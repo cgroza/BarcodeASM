@@ -42,7 +42,7 @@ size_t LocalAssemblyWindow::assembleReads() {
 
   fermi.SetMinOverlap(m_params.min_overlap);
   fermi.AddReads(m_reads);
-  fermi.CorrectAndFilterReads();
+  // fermi.CorrectAndFilterReads();
   fermi.PerformAssembly();
 
   size_t count = 0;
