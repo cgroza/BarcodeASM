@@ -1,8 +1,4 @@
 #include "LocalAssemblyWindow.h"
-#include "SeqLib/FermiAssembler.h"
-#include <algorithm>
-#include <iterator>
-#include <vector>
 
 LocalAssemblyWindow::LocalAssemblyWindow(SeqLib::GenomicRegion region,
                                          SeqLib::BamReader bam,
@@ -44,6 +40,10 @@ size_t LocalAssemblyWindow::assembleReads() {
   fermi.AddReads(m_reads);
   // fermi.CorrectAndFilterReads();
   fermi.PerformAssembly();
+
+  std::ofstream gfa_out(m_prefix + ".gfa");
+  fermi.WriteGFA(gfa_out);
+  gfa_out.close();
 
   size_t count = 0;
   for(auto contig : fermi.GetContigs()) {

@@ -3,16 +3,17 @@
 
 #include "BxBamWalker.h"
 #include "SeqLib/BamReader.h"
+#include "SeqLib/FermiAssembler.h"
 #include "SeqLib/GenomicRegion.h"
 #include "SeqLib/SeqLibUtils.h"
 #include "SeqLib/UnalignedSequence.h"
-#include "SeqLib/FermiAssembler.h"
 #include <algorithm>
 #include <fstream>
 #include <iterator>
+#include <ostream>
 #include <sstream>
 #include <string>
-#include <ostream>
+#include <vector>
 
 struct AssemblyParams {
     double error_rate = 0;
