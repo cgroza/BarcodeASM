@@ -25,9 +25,21 @@ size_t LocalAssemblyWindow::retrieveGenomewideReads() {
   }
   // std::cerr << "Sum " << total << std::endl;
 
+  // make sure to only import unique reads
+  // tally already imported reads
+  std::unordered_set<std::string> seqs;
+  for(auto& r : m_reads)
+      seqs.insert(r.Sequence());
   // add the genome wide reads to assembly
   BamReadVector genomewide_reads = m_bx_bam.fetchReadsByBxBarcode(barcodes);
-  std::copy(genomewide_reads.begin(), genomewide_reads.end(), std::back_inserter(m_reads));
+  for(auto &r : genomewide_reads) {
+      // add this record if it is new
+      if(seqs.count(r.Sequence()) == 0) {
+          seqs.insert(r.Sequence());
+          m_reads.push_back(r);
+      }
+  }
+  // std::copy(genomewide_reads.begin(), genomewide_reads.end(), std::back_inserter(m_reads));
   // std::cerr << "Post barcode collection: " << m_reads.size() << std::endl;
   return m_reads.size();
 }

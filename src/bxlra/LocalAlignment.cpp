@@ -1,5 +1,4 @@
 #include "LocalAlignment.h"
-#include <sstream>
 
 LocalAlignment::LocalAlignment(std::string chr, size_t start, size_t end,
                                const SeqLib::RefGenome &genome)

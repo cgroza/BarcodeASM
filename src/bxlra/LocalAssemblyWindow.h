@@ -14,6 +14,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <unordered_set>
 
 struct AssemblyParams {
     size_t min_overlap = 90;

@@ -27,7 +27,7 @@ bxlra_LDADD = \
 	$(top_builddir)/SeqLib/fermi-lite/libfml.a \
 	-llzma -lbz2 -lz
 
-bxlra_SOURCES = bxlra.cpp BxBamWalker.cpp RegionFileReader.cpp LocalAssemblyWindow.cpp LocalAlignment.cpp
+bxlra_SOURCES = bxlra.cpp BxBamWalker.cpp RegionFileReader.cpp LocalAssemblyWindow.cpp LocalAlignment.cpp ReadAlignment.cpp
 
 install:
 	mkdir -p ../../bin && mv bxlra ../../bin

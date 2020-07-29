@@ -2,20 +2,22 @@
 #include "CTPL/ctpl_stl.h"
 #include "LocalAlignment.h"
 #include "LocalAssemblyWindow.h"
+#include "ReadAlignment.h"
 #include "RegionFileReader.h"
 #include "SeqLib/BamRecord.h"
 #include "SeqLib/RefGenome.h"
 #include "SeqLib/UnalignedSequence.h"
+#include <ReadAlignment.h>
 #include <algorithm>
 #include <cstdlib>
 #include <fstream>
+#include <future>
 #include <iostream>
 #include <iterator>
 #include <mutex>
 #include <stdexcept>
 #include <unistd.h>
 #include <vector>
-#include <future>
 
 #ifdef DEBUG_MINIMAP
 std::string ref("GTCAAAGTAAAGAAAACAAAACGAATCAAAATCCCTGTGCGTTTTCCAGTGAGCTGTAGCCAAGCCGAGTGAATTTTCTGTCTCTTGAATTCTAGGTGCTGAGAACTGATTGGCATCATCATCTTTTGAGAAATTAAACTTTAGTCATA"
@@ -115,7 +117,8 @@ int main(int argc, char **argv) {
   params.min_overlap = opt::min_overlap;
   params.aggressive_bubble_pop = opt::aggressive_bubble_pop;
   std::cerr << "Params o: " << params.min_overlap << std::endl
-            << "Params A: " << params.aggressive_bubble_pop << std::endl;
+            << "Params P: " << params.aggressive_bubble_pop << std::endl
+            << "Params a: " << opt::weird_reads_only << std::endl;
 
   // Storage for thread pooled resources
   // These not be guarded by mutex, since they assigned to individual thread IDs
@@ -169,8 +172,12 @@ int main(int argc, char **argv) {
       LocalAssemblyWindow local_win(region, *bam_readers[id], *bx_bam_walkers[id], params);
 
       local_win.assembleReads();
-      local_win.clearReads();
+      
+      ReadAlignment read_aln(local_win.getContigs());
+      read_aln.alignReads(local_win.getReads());
+
       std::cerr << "Reads: " << local_win.getReads().size() << std::endl;
+      local_win.clearReads();
       std::cerr << "Contigs: " << local_win.getContigs().size() << std::endl;
 
       // MUTEX: only one thread must write to the fasta file at a time

@@ -12,25 +12,8 @@
 #include <stdlib.h>
 #include <unordered_map>
 #include <sstream>
+#include "AlignmentCommon.h"
 
-struct MinimapAlignment {
-    mm_reg1_t* reg;
-    int num_hits;
-};
-
-struct UnalignedSequenceHash {
-  std::size_t operator()(const SeqLib::UnalignedSequence &k) const {
-    return std::hash<std::string>()(k.Seq);
-  }
-};
-
-struct UnalignedSequenceEqualsTo {
-  bool operator()(const SeqLib::UnalignedSequence &a,
-                  const SeqLib::UnalignedSequence b) const {
-    return std::equal_to<std::string>()(a.Seq, b.Seq) &&
-           std::equal_to<std::string>()(a.Name, b.Name);
-  }
-};
 
 class LocalAlignment {
 public:
