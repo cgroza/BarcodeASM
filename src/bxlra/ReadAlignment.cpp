@@ -38,25 +38,37 @@ ReadAlignment::~ReadAlignment() {
 }
 
 void ReadAlignment::alignReads(const BamReadVector &reads) {
+  std::unordered_map<std::string, std::unordered_set<std::string>> read_contig_map;
   mm_tbuf_t *thread_buf = mm_tbuf_init();
   for (auto &read : reads) {
+    read_contig_map.emplace(read.Qname(), std::unordered_set<std::string>());
+
     int num_hits;
-    mm_reg1_t *reg =
-        mm_map(m_minimap_index, read.Sequence().length(), read.Sequence().c_str(),
+    mm_reg1_t *reg = mm_map(m_minimap_index, read.Sequence().length(), read.Sequence().c_str(),
                &num_hits, thread_buf, &m_map_opt, read.Qname().c_str());
+
     for (int j = 0; j < num_hits; ++j) { // traverse hits and print them out
       mm_reg1_t *r = &reg[j];
       assert(r->p); // with MM_F_CIGAR, this should not be NULL
-      std::cerr << read.Qname() << " " << read.Sequence().length() << " " <<
-          r->qs << " " << r->qe << " " << "+-"[r->rev] << " " <<
-          m_minimap_index->seq[r->rid].name << " " <<
-          m_minimap_index->seq[r->rid].len << " " <<
-          r->rs << " " << r->re  << " " << r->mlen << " " <<
-          r->blen << " " << r->mapq << " " << j << std::endl;
-      // for (i = 0; i < r->p->n_cigar; ++i)
-      //   printf("%d%c", r->p->cigar[i] >> 4, "MIDNSH"[r->p->cigar[i] & 0xf]);
+      read_contig_map[read.Qname()].insert(m_minimap_index->seq[r->rid].name);
+          // std::cerr << read.Qname() << " " << read.Sequence().length() << " "
+          // <<
+          //     r->qs << " " << r->qe << " " << "+-"[r->rev] << " " <<
+          //     m_minimap_index->seq[r->rid].name << " " <<
+          //     m_minimap_index->seq[r->rid].len << " " <<
+          //     r->rs << " " << r->re  << " " << r->mlen << " " <<
+          //     r->blen << " " << r->mapq << " " << j << std::endl;
+          // for (i = 0; i < r->p->n_cigar; ++i)
+          //   printf("%d%c", r->p->cigar[i] >> 4, "MIDNSH"[r->p->cigar[i] &
+          //   0xf]);
       free(r->p);
     }
   }
   mm_tbuf_destroy(thread_buf);
+
+  for(auto &r : read_contig_map) {
+      std::cerr << r.first << " ";
+      for (auto &c : r.second) std::cerr << c << " ";
+      std::cerr << std::endl;
+  }
 }

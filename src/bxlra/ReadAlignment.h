@@ -7,6 +7,7 @@
 #include "minimap2/minimap.h"
 #include <vector>
 #include <string>
+#include <unordered_map>
 
 class ReadAlignment {
     public:
