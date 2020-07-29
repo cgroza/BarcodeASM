@@ -21,7 +21,8 @@ class ReadAlignment {
     const int IS_HPC = 0;
 
   private:
-    char** m_sequences;
+    char** m_sequences;         // contigs to be aligned
+    char** m_names;             // names of contigs
     size_t m_num_seqs;
 
     mm_idx_t *m_minimap_index;

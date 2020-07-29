@@ -3,18 +3,24 @@
 ReadAlignment::ReadAlignment(const SeqLib::UnalignedSequenceVector &contigs) {
     m_num_seqs = contigs.size();
     m_sequences = new char*[m_num_seqs];
+    m_names = new char*[m_num_seqs];
 
     for(size_t i = 0; i < m_num_seqs; i++) {
         size_t seq_size = contigs.at(i).Seq.length();
+        size_t name_size = contigs.at(i).Name.length();
+
         m_sequences[i] = new char[seq_size + 1];
+        m_names[i] = new char[name_size + 1];
+
         memcpy(m_sequences[i], contigs.at(i).Seq.c_str(), seq_size + 1);
+        memcpy(m_names[i], contigs.at(i).Name.c_str(), name_size + 1);
     }
 
     mm_set_opt(0, &m_index_opt, &m_map_opt);
     m_map_opt.flag |= MM_F_CIGAR; // perform alignment
 
     m_minimap_index = mm_idx_str(MINIMIZER_W, MINIMIZER_W, IS_HPC, BUCKET_BITS,
-                                 1, (const char**) m_sequences , NULL);
+                                 1, (const char**) m_sequences , (const char**) m_names);
     // update the mapping options
     mm_mapopt_update(&m_map_opt, m_minimap_index);
     mm_idx_stat(m_minimap_index);
@@ -23,10 +29,12 @@ ReadAlignment::ReadAlignment(const SeqLib::UnalignedSequenceVector &contigs) {
 ReadAlignment::~ReadAlignment() {
   // free allocated memory
   mm_idx_destroy(m_minimap_index);
-  for(size_t i = 0; i < m_num_seqs; i++)
+  for(size_t i = 0; i < m_num_seqs; i++) {
       delete m_sequences[i];
+      delete m_names[i];
+  }
   delete m_sequences;
-
+  delete m_names;
 }
 
 void ReadAlignment::alignReads(const BamReadVector &reads) {
