@@ -20,7 +20,7 @@ ReadAlignment::ReadAlignment(const SeqLib::UnalignedSequenceVector &contigs) {
     m_map_opt.flag |= MM_F_CIGAR; // perform alignment
 
     m_minimap_index = mm_idx_str(MINIMIZER_W, MINIMIZER_W, IS_HPC, BUCKET_BITS,
-                                 1, (const char**) m_sequences , (const char**) m_names);
+                                 m_num_seqs, (const char**) m_sequences , (const char**) m_names);
     // update the mapping options
     mm_mapopt_update(&m_map_opt, m_minimap_index);
     mm_idx_stat(m_minimap_index);
