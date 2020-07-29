@@ -18,6 +18,7 @@
 struct AssemblyParams {
     size_t min_overlap = 90;
     size_t min_contig_length = 200;
+    size_t aggressive_bubble_pop = false;
 };
 
 

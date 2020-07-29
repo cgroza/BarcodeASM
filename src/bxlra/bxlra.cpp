@@ -57,6 +57,7 @@ std::string reference_path;
 size_t min_overlap = 90;
 size_t num_threads = 1;
 bool weird_reads_only = true;
+bool aggressive_bubble_pop = false;
 } // namespace opt
 
 int main(int argc, char **argv) {
@@ -74,7 +75,7 @@ int main(int argc, char **argv) {
 
   opterr = 0;
   int c;
-  while ((c = getopt(argc, argv, "at:b:B:r:g:o:")) != -1)
+  while ((c = getopt(argc, argv, "Pat:b:B:r:g:o:")) != -1)
     switch (c) {
     case 't':
         try {
@@ -94,6 +95,9 @@ int main(int argc, char **argv) {
     case 'r':
       opt::regions_path = optarg;
       break;
+    case 'A':
+      opt::aggressive_bubble_pop = true;
+      break;
     case 'a':
       opt::weird_reads_only = false;
       break;
@@ -109,7 +113,9 @@ int main(int argc, char **argv) {
 
   AssemblyParams params;
   params.min_overlap = opt::min_overlap;
-  std::cerr << "Params o: " << params.min_overlap << std::endl;
+  params.aggressive_bubble_pop = opt::aggressive_bubble_pop;
+  std::cerr << "Params o: " << params.min_overlap << std::endl
+            << "Params A: " << params.aggressive_bubble_pop << std::endl;
 
   // Storage for thread pooled resources
   // These not be guarded by mutex, since they assigned to individual thread IDs

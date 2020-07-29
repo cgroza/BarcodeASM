@@ -38,6 +38,8 @@ size_t LocalAssemblyWindow::assembleReads() {
 
   fermi.SetMinOverlap(m_params.min_overlap);
   fermi.AddReads(m_reads);
+  if(m_params.aggressive_bubble_pop)
+      fermi.SetAggressiveTrim();
   // fermi.CorrectAndFilterReads();
   fermi.PerformAssembly();
 
