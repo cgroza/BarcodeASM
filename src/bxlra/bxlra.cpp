@@ -95,7 +95,7 @@ int main(int argc, char **argv) {
     case 'r':
       opt::regions_path = optarg;
       break;
-    case 'A':
+    case 'P':
       opt::aggressive_bubble_pop = true;
       break;
     case 'a':
