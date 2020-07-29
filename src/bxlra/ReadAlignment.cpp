@@ -38,8 +38,8 @@ ReadAlignment::~ReadAlignment() {
 }
 
 void ReadAlignment::alignReads(const BamReadVector &reads) {
+  mm_tbuf_t *thread_buf = mm_tbuf_init();
   for (auto &read : reads) {
-    mm_tbuf_t *thread_buf = mm_tbuf_init();
     int num_hits;
     mm_reg1_t *reg =
         mm_map(m_minimap_index, read.Sequence().length(), read.Sequence().c_str(),
@@ -52,11 +52,11 @@ void ReadAlignment::alignReads(const BamReadVector &reads) {
           m_minimap_index->seq[r->rid].name << " " <<
           m_minimap_index->seq[r->rid].len << " " <<
           r->rs << " " << r->re  << " " << r->mlen << " " <<
-          r->blen << " " << r->mapq << std::endl;
+          r->blen << " " << r->mapq << " " << j << std::endl;
       // for (i = 0; i < r->p->n_cigar; ++i)
       //   printf("%d%c", r->p->cigar[i] >> 4, "MIDNSH"[r->p->cigar[i] & 0xf]);
       free(r->p);
-      mm_tbuf_destroy(thread_buf);
     }
   }
+  mm_tbuf_destroy(thread_buf);
 }

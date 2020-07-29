@@ -43,15 +43,14 @@ LocalAlignment::~LocalAlignment() {
 }
 
 void LocalAlignment::align(const SeqLib::UnalignedSequenceVector &seqs) {
+  mm_tbuf_t *thread_buf = mm_tbuf_init();
   for (auto &seq : seqs) {
     MinimapAlignment alignment;
-    mm_tbuf_t *thread_buf = mm_tbuf_init();
-
     alignment.reg = mm_map(m_minimap_index, seq.Seq.length(), seq.Seq.c_str(),
                            &alignment.num_hits, thread_buf, &m_map_opt, seq.Name.c_str());
     m_alignments[seq] = alignment;
-    mm_tbuf_destroy(thread_buf);
   }
+  mm_tbuf_destroy(thread_buf);
 }
 
 size_t LocalAlignment::writeAlignments(std::ostream &out) {
