@@ -1,4 +1,5 @@
 #include "ReadAlignment.h"
+#include <algorithm>
 
 ReadAlignment::ReadAlignment(const SeqLib::UnalignedSequenceVector &contigs) {
     m_num_seqs = contigs.size();
@@ -47,8 +48,8 @@ void ReadAlignment::alignReads(const BamReadVector &reads) {
     mm_reg1_t *reg = mm_map(m_minimap_index, read.Sequence().length(), read.Sequence().c_str(),
                &num_hits, thread_buf, &m_map_opt, read.Qname().c_str());
 
-    for (int j = 0; j < num_hits; ++j) { // traverse hits and print them out
-      mm_reg1_t *r = &reg[j];
+    if (num_hits > 0) { // traverse hits and print them out
+      mm_reg1_t *r = &reg[0];
       assert(r->p); // with MM_F_CIGAR, this should not be NULL
       read_contig_map[read.Qname()].insert(m_minimap_index->seq[r->rid].name);
           // std::cerr << read.Qname() << " " << read.Sequence().length() << " "
@@ -66,6 +67,11 @@ void ReadAlignment::alignReads(const BamReadVector &reads) {
   }
   mm_tbuf_destroy(thread_buf);
 
+  // clear empty entries or that are fully within one contig
+  for(auto it = read_contig_map.begin(); it != read_contig_map.end(); it++) {
+      if(it -> second.size() <= 1)
+          read_contig_map.erase(it);
+  }
   for(auto &r : read_contig_map) {
       std::cerr << r.first << " ";
       for (auto &c : r.second) std::cerr << c << " ";
