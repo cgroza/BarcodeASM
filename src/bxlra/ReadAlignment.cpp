@@ -65,16 +65,18 @@ void ReadAlignment::alignReads(const BamReadVector &reads) {
       free(r->p);
     }
   }
-  mm_tbuf_destroy(thread_buf);
 
   // clear empty entries or that are fully within one contig
-  for(auto it = read_contig_map.begin(); it != read_contig_map.end(); it++) {
+  for(auto it = read_contig_map.begin(); it != read_contig_map.end(); ) {
       if(it -> second.size() <= 1)
-          read_contig_map.erase(it);
+          it = read_contig_map.erase(it);
+      else it++;
   }
+
   for(auto &r : read_contig_map) {
       std::cerr << r.first << " ";
       for (auto &c : r.second) std::cerr << c << " ";
       std::cerr << std::endl;
   }
+  mm_tbuf_destroy(thread_buf);
 }
