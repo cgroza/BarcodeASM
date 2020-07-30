@@ -8,7 +8,7 @@ ContigMatePairGraph::ContigMatePairGraph(std::unordered_set<std::string> &contig
 
     for(auto& b : mate_contig_map) {
         std::vector<std::string> keys;
-        std::copy(b.second.begin(), b.second.end(), keys.begin());
+        std::copy(b.second.begin(), b.second.end(), std::back_inserter(keys));
         m_edges.emplace(keys.at(0), keys.at(1));
     }
 }
@@ -77,7 +77,7 @@ ContigMatePairGraph ReadAlignment::alignReads(const BamReadVector &reads) {
     if (num_hits > 0) { // include first hit
       mm_reg1_t *r = &reg[0];
       assert(r->p); // with MM_F_CIGAR, this should not be NULL
-      read_contig_map[read.Qname()].insert(m_minimap_index->seq[r->rid].name);
+      read_contig_map[read.Qname()].emplace(std::string(m_minimap_index->seq[r->rid].name));
           // std::cerr << read.Qname() << " " << read.Sequence().length() << " "
           // <<
           //     r->qs << " " << r->qe << " " << "+-"[r->rev] << " " <<
