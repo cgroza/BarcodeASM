@@ -1,30 +1,56 @@
 #include "ReadAlignment.h"
-#include <algorithm>
+#include <ostream>
+#include <utility>
 
-ReadAlignment::ReadAlignment(const SeqLib::UnalignedSequenceVector &contigs) {
-    m_num_seqs = contigs.size();
-    m_sequences = new char*[m_num_seqs];
-    m_names = new char*[m_num_seqs];
+ContigMatePairGraph::ContigMatePairGraph(std::unordered_set<std::string> &contigs,
+                                         MatePairContigMap &mate_contig_map) :
+    m_segments(contigs) {
 
-    for(size_t i = 0; i < m_num_seqs; i++) {
-        size_t seq_size = contigs.at(i).Seq.length();
-        size_t name_size = contigs.at(i).Name.length();
-
-        m_sequences[i] = new char[seq_size + 1];
-        m_names[i] = new char[name_size + 1];
-
-        memcpy(m_sequences[i], contigs.at(i).Seq.c_str(), seq_size + 1);
-        memcpy(m_names[i], contigs.at(i).Name.c_str(), name_size + 1);
+    for(auto& b : mate_contig_map) {
+        std::vector<std::string> keys;
+        std::copy(b.second.begin(), b.second.end(), keys.begin());
+        m_edges.emplace(keys.at(0), keys.at(1));
     }
+}
 
-    mm_set_opt(0, &m_index_opt, &m_map_opt);
-    m_map_opt.flag |= MM_F_CIGAR; // perform alignment
+void ContigMatePairGraph::writeGFA(std::ostream &out){
+    // Header
+    out << "H\tVN:Z:1.0" << std::endl;
 
-    m_minimap_index = mm_idx_str(MINIMIZER_W, MINIMIZER_W, IS_HPC, BUCKET_BITS,
-                                 m_num_seqs, (const char**) m_sequences , (const char**) m_names);
-    // update the mapping options
-    mm_mapopt_update(&m_map_opt, m_minimap_index);
-    mm_idx_stat(m_minimap_index);
+    // Segments
+    for(auto &s : m_segments)
+        out << "S\t" << s << "\t*" << std::endl;
+    // Links
+    for(auto &e : m_edges)
+        out << "L\t" << e.first << "\t+\t" << e.second << "\t+\t*" << std::endl;
+}
+
+ReadAlignment::ReadAlignment(const SeqLib::UnalignedSequenceVector &contigs, const std::string &prefix)
+    : m_prefix(prefix) {
+  m_num_seqs = contigs.size();
+  m_sequences = new char *[m_num_seqs];
+  m_names = new char *[m_num_seqs];
+
+  for (size_t i = 0; i < m_num_seqs; i++) {
+    size_t seq_size = contigs.at(i).Seq.length();
+    size_t name_size = contigs.at(i).Name.length();
+
+    m_sequences[i] = new char[seq_size + 1];
+    m_names[i] = new char[name_size + 1];
+
+    memcpy(m_sequences[i], contigs.at(i).Seq.c_str(), seq_size + 1);
+    memcpy(m_names[i], contigs.at(i).Name.c_str(), name_size + 1);
+  }
+
+  mm_set_opt(0, &m_index_opt, &m_map_opt);
+  m_map_opt.flag |= MM_F_CIGAR; // perform alignment
+
+  m_minimap_index =
+      mm_idx_str(MINIMIZER_W, MINIMIZER_W, IS_HPC, BUCKET_BITS, m_num_seqs,
+                 (const char **)m_sequences, (const char **)m_names);
+  // update the mapping options
+  mm_mapopt_update(&m_map_opt, m_minimap_index);
+  mm_idx_stat(m_minimap_index);
 }
 
 ReadAlignment::~ReadAlignment() {
@@ -38,8 +64,8 @@ ReadAlignment::~ReadAlignment() {
   delete m_names;
 }
 
-void ReadAlignment::alignReads(const BamReadVector &reads) {
-  std::unordered_map<std::string, std::unordered_set<std::string>> read_contig_map;
+ContigMatePairGraph ReadAlignment::alignReads(const BamReadVector &reads) {
+  MatePairContigMap read_contig_map;
   mm_tbuf_t *thread_buf = mm_tbuf_init();
   for (auto &read : reads) {
     read_contig_map.emplace(read.Qname(), std::unordered_set<std::string>());
@@ -48,7 +74,7 @@ void ReadAlignment::alignReads(const BamReadVector &reads) {
     mm_reg1_t *reg = mm_map(m_minimap_index, read.Sequence().length(), read.Sequence().c_str(),
                &num_hits, thread_buf, &m_map_opt, read.Qname().c_str());
 
-    if (num_hits > 0) { // traverse hits and print them out
+    if (num_hits > 0) { // include first hit
       mm_reg1_t *r = &reg[0];
       assert(r->p); // with MM_F_CIGAR, this should not be NULL
       read_contig_map[read.Qname()].insert(m_minimap_index->seq[r->rid].name);
@@ -68,7 +94,7 @@ void ReadAlignment::alignReads(const BamReadVector &reads) {
 
   // clear empty entries or that are fully within one contig
   for(auto it = read_contig_map.begin(); it != read_contig_map.end(); ) {
-      if(it -> second.size() <= 1)
+      if(it -> second.size() != 2)
           it = read_contig_map.erase(it);
       else it++;
   }
@@ -79,4 +105,14 @@ void ReadAlignment::alignReads(const BamReadVector &reads) {
       std::cerr << std::endl;
   }
   mm_tbuf_destroy(thread_buf);
+
+  std::unordered_set<std::string> contigs;
+  for(size_t i = 0; i < m_num_seqs; i++)
+      contigs.emplace(m_names[i]);
+
+  ContigMatePairGraph contig_mate_pair_grah(contigs, read_contig_map);
+  std::ofstream gfa_out(m_prefix + "_mates.gfa");
+  contig_mate_pair_grah.writeGFA(gfa_out);
+  gfa_out.close();
+  return contig_mate_pair_grah;
 }

@@ -1,4 +1,5 @@
 #include "LocalAssemblyWindow.h"
+#include <string>
 
 LocalAssemblyWindow::LocalAssemblyWindow(SeqLib::GenomicRegion region,
                                          SeqLib::BamReader bam,
@@ -114,4 +115,8 @@ void LocalAssemblyWindow::writeContigs(std::ostream &out) {
         out << ">" << contig.Name << std::endl;
         out << contig.Seq << std::endl;
     }
+}
+
+std::string LocalAssemblyWindow::getPrefix() const {
+    return m_prefix;
 }

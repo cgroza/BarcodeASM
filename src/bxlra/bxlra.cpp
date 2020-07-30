@@ -172,8 +172,8 @@ int main(int argc, char **argv) {
       LocalAssemblyWindow local_win(region, *bam_readers[id], *bx_bam_walkers[id], params);
 
       local_win.assembleReads();
-      
-      ReadAlignment read_aln(local_win.getContigs());
+
+      ReadAlignment read_aln(local_win.getContigs(), local_win.getPrefix());
       read_aln.alignReads(local_win.getReads());
 
       std::cerr << "Reads: " << local_win.getReads().size() << std::endl;

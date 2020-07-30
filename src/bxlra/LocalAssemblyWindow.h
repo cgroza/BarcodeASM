@@ -34,7 +34,7 @@ public:
     BamReadVector getReads() const;
     void clearReads();
     void writeContigs(std::ostream &out);
-
+    std::string getPrefix() const;
 
   private:
     void sortContigs();
