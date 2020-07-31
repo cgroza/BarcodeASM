@@ -62,24 +62,6 @@ BxBamWalker::fetchReadsByBxBarcode(const BxBarcodeCounts &bx_barcodes) {
   return all_reads;
 }
 
-// std::set<BxBarcode>
-BxBarcodeCounts BxBamWalker::collectBxBarcodes(const BamReadVector &reads) {
-  std::cerr << "Received " << reads.size() <<  " reads for barcode collection" << std::endl;
-  BxBarcodeCounts barcodes;
-  for (const SeqLib::BamRecord &r : reads) {
-    std::string bx_tag;
-    // tag may not always be present
-    if (r.GetZTag("BX", bx_tag)) {
-        if (barcodes.find(bx_tag) == barcodes.end()) {
-            barcodes[bx_tag] = 1;
-        }
-        else {
-            barcodes[bx_tag] = barcodes[bx_tag] + 1;
-        }
-    }
-  }
-  return barcodes;
-}
 
 bool BxBamWalker::isBxReadWeird(SeqLib::BamRecord &r) {
     // look for unmapped reads, unpaired reads and poor alignments

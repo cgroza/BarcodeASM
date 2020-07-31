@@ -99,11 +99,14 @@ ContigMatePairGraph ReadAlignment::alignReads(const BamReadVector &reads) {
       else it++;
   }
 
+  #ifdef DEBUG_READ_ALIGNMENT
   for(auto &r : read_contig_map) {
       std::cerr << r.first << " ";
       for (auto &c : r.second) std::cerr << c << " ";
       std::cerr << std::endl;
   }
+  #endif
+
   mm_tbuf_destroy(thread_buf);
 
   std::unordered_set<std::string> contigs;

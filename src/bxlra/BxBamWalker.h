@@ -37,8 +37,6 @@ class BxBamWalker : public SeqLib::BamReader {
     /*  */
     BamReadVector fetchReadsByBxBarcode(const BxBarcode &bx_barcode);
     BamReadVector fetchReadsByBxBarcode(const BxBarcodeCounts &bx_barcodes);
-
-    static BxBarcodeCounts collectBxBarcodes(const BamReadVector &reads);
     std::string prefix;
 
     static bool isBxReadWeird(SeqLib::BamRecord &r);

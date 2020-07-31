@@ -75,13 +75,23 @@ BxBarcodeCounts LocalAssemblyWindow::collectLocalBarcodes() {
   m_bam.SetRegion(m_region);
 
   BamReadVector read_vector;
+  BxBarcodeCounts barcodes;
 
   while (true) {
-    // Retrieve all reads within this region.
+    // Retrieve all reads within this region and their barcodes
     SeqLib::BamRecord bam_record;
 
     if (m_bam.GetNextRecord(bam_record)) {
       read_vector.push_back(bam_record);
+
+      std::string bx_tag;
+      // tag may not always be present
+      if (bam_record.GetZTag("BX", bx_tag)) {
+        if (barcodes.find(bx_tag) == barcodes.end())
+          barcodes[bx_tag] = 1;
+        else
+          barcodes[bx_tag] = barcodes[bx_tag] + 1;
+      }
     } else
       break;
   }
@@ -89,7 +99,7 @@ BxBarcodeCounts LocalAssemblyWindow::collectLocalBarcodes() {
   m_reads = read_vector;
 
   std::cerr << "Local reads: " << read_vector.size() << std::endl;
-  return BxBamWalker::collectBxBarcodes(read_vector);
+  return barcodes;
 }
 
 SeqLib::UnalignedSequenceVector LocalAssemblyWindow::getContigs() const {
