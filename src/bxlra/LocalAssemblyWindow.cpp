@@ -32,6 +32,12 @@ size_t LocalAssemblyWindow::retrieveGenomewideReads() {
     total += b.second;
   }
 
+  std::cerr << "Barcode haplotype" << std::endl;
+  for (const auto &b : m_barcode_hap) {
+    std::cerr << b.first << " " << b.second << std::endl;
+    total += b.second;
+  }
+
   // make sure to only import unique reads
   // tally already imported reads
   std::unordered_set<std::string> seqs;
@@ -102,8 +108,14 @@ void LocalAssemblyWindow::collectLocalBarcodes() {
 
               // barcode phase set init
               int ps;
-              if(bam_record.GetIntTag("PS", ps))
+              if(bam_record.GetIntTag("PS", ps)) {
                   m_barcode_phase[bx_tag] = ps;
+
+                  // barcode haplotype init
+                  int hp;
+                  if(bam_record.GetIntTag("HP", hp))
+                      m_barcode_hap[bx_tag] = hp;
+              }
           }
         else
           m_barcode_count[bx_tag] = m_barcode_count[bx_tag] + 1;

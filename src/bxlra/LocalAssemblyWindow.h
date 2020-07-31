@@ -24,6 +24,7 @@ struct AssemblyParams {
 
 typedef std::unordered_map<BxBarcode, int> BxBarcodeCounts;
 typedef std::unordered_map<BxBarcode, int> BxBarcodePS;
+typedef std::unordered_map<BxBarcode, int> BxBarcodeHap;
 
 class LocalAssemblyWindow {
 public:
@@ -51,6 +52,7 @@ public:
     // keep track of barcode frequency and their phase set
     BxBarcodeCounts m_barcode_count;
     BxBarcodePS m_barcode_phase;
+    BxBarcodeHap m_barcode_hap;
 };
 
 #endif
