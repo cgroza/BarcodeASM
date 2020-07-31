@@ -1,5 +1,5 @@
 #include "LocalAssemblyWindow.h"
-#include <string>
+#include "BxBamWalker.h"
 
 LocalAssemblyWindow::LocalAssemblyWindow(SeqLib::GenomicRegion region,
                                          SeqLib::BamReader bam,
@@ -14,17 +14,23 @@ LocalAssemblyWindow::LocalAssemblyWindow(SeqLib::GenomicRegion region,
 }
 
 size_t LocalAssemblyWindow::retrieveGenomewideReads() {
-  BxBarcodeCounts barcodes = collectLocalBarcodes();
+  collectLocalBarcodes();
   std::cerr << "Pre barcode collection: " << m_reads.size() << std::endl;
 
   // Barcode frequency in assembly window
-  // std::cerr << std::endl;
+  std::cerr << "Barcode frequency" <<  std::endl;
   size_t total = 0;
-  for (const auto &b : barcodes) {
+  for (const auto &b : m_barcode_count) {
     std::cerr << b.first << " " << b.second << std::endl;
     total += b.second;
   }
-  // std::cerr << "Sum " << total << std::endl;
+  std::cerr << "Sum " << total << std::endl;
+
+  std::cerr << "Barcode phase sets" << std::endl;
+  for (const auto &b : m_barcode_phase) {
+    std::cerr << b.first << " " << b.second << std::endl;
+    total += b.second;
+  }
 
   // make sure to only import unique reads
   // tally already imported reads
@@ -32,6 +38,10 @@ size_t LocalAssemblyWindow::retrieveGenomewideReads() {
   for(auto& r : m_reads)
       seqs.insert(r.Sequence());
   // add the genome wide reads to assembly
+  std::vector<BxBarcode> barcodes;
+  for (auto &b : m_barcode_count)
+      barcodes.push_back(b.first);
+
   BamReadVector genomewide_reads = m_bx_bam.fetchReadsByBxBarcode(barcodes);
   for(auto &r : genomewide_reads) {
       // add this record if it is new
@@ -69,34 +79,38 @@ size_t LocalAssemblyWindow::assembleReads() {
   return count;
 }
 
-BxBarcodeCounts LocalAssemblyWindow::collectLocalBarcodes() {
+void LocalAssemblyWindow::collectLocalBarcodes() {
   std::cerr << m_region.ToString(m_bam.Header()) << std::endl;
   m_bam.SetRegion(m_region);
 
-  BamReadVector read_vector;
-  BxBarcodeCounts barcodes;
-
   while (true) {
-    // Retrieve all reads within this region and their barcodes
+    // Retrieve all reads within this region and their barcode frequencies and
+    // phase sets
     SeqLib::BamRecord bam_record;
 
     if (m_bam.GetNextRecord(bam_record)) {
-      read_vector.push_back(bam_record);
+      m_reads.push_back(bam_record);
 
+      // collect barcode and its phase set
       std::string bx_tag;
-      // tag may not always be present
+      // barcode tag may not always be present
       if (bam_record.GetZTag("BX", bx_tag)) {
-        if (barcodes.find(bx_tag) == barcodes.end())
-          barcodes[bx_tag] = 1;
+          if (m_barcode_count.find(bx_tag) == m_barcode_count.end()) {
+
+              // barcode init
+              m_barcode_count[bx_tag] = 1;
+
+              // barcode phase set init
+              int ps;
+              if(bam_record.GetIntTag("PS", ps))
+                  m_barcode_phase[bx_tag] = ps;
+          }
         else
-          barcodes[bx_tag] = barcodes[bx_tag] + 1;
+          m_barcode_count[bx_tag] = m_barcode_count[bx_tag] + 1;
       }
     } else
       break;
   }
-  // Add these records to the assembly
-  m_reads = read_vector;
-  return barcodes;
 }
 
 SeqLib::UnalignedSequenceVector LocalAssemblyWindow::getContigs() const {

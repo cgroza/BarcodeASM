@@ -48,10 +48,9 @@ BamReadVector
 }
 
 BamReadVector
-BxBamWalker::fetchReadsByBxBarcode(const BxBarcodeCounts &bx_barcodes) {
+BxBamWalker::fetchReadsByBxBarcode(const std::vector<BxBarcode> &bx_barcodes) {
   BamReadVector all_reads;
-  for (const auto &barcode_count : bx_barcodes) {
-    const BxBarcode &barcode = barcode_count.first;
+  for (const auto &barcode : bx_barcodes) {
     std::string barcode_copy = barcode;
     // "-" gets translated to "_" during bxtools convert. We must correct this.
     std::replace(barcode_copy.begin(), barcode_copy.end(), '-', '_');
