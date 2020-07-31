@@ -40,8 +40,7 @@ size_t LocalAssemblyWindow::retrieveGenomewideReads() {
           m_reads.push_back(r);
       }
   }
-  // std::copy(genomewide_reads.begin(), genomewide_reads.end(), std::back_inserter(m_reads));
-  // std::cerr << "Post barcode collection: " << m_reads.size() << std::endl;
+  std::cerr << "Post barcode collection: " << m_reads.size() << std::endl;
   return m_reads.size();
 }
 
@@ -97,8 +96,6 @@ BxBarcodeCounts LocalAssemblyWindow::collectLocalBarcodes() {
   }
   // Add these records to the assembly
   m_reads = read_vector;
-
-  std::cerr << "Local reads: " << read_vector.size() << std::endl;
   return barcodes;
 }
 
