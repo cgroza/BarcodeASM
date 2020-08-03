@@ -66,6 +66,10 @@ size_t LocalAssemblyWindow::assembleReads() {
   // Use the phased reads to do haploid assembly of the region
   if(m_params.split_reads_by_phase) {
       PhaseSplit split = separateReadsByPhase();
+
+      std::cerr << "Phase 1 reads " << split.first.size() << std::endl;
+      std::cerr << "Phase 2 reads " << split.second.size() << std::endl;
+
       size_t h1 = assemblePhase(split.first, "1");
       size_t h2 = assemblePhase(split.second, "2");
       return h1 + h2;
@@ -168,8 +172,9 @@ PhaseSplit LocalAssemblyWindow::separateReadsByPhase() {
             case 1:
                 phase_split.first.push_back(r);
                 break;
-            case 2: break;
+            case 2:
                 phase_split.second.push_back(r);
+                break;
             }
         }
     }
