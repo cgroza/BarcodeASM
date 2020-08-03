@@ -157,7 +157,22 @@ void LocalAssemblyWindow::sortContigs() {
 
 PhaseSplit LocalAssemblyWindow::separateReadsByPhase() {
     PhaseSplit phase_split;
-
+    // run through the reads and split according to barcode/phase association
+    for(auto &r : m_reads) {
+        std::string bx_tag;
+        if(r.GetZTag("BX", bx_tag)) {
+            // check if we have a phasing for this barcode
+            if(m_barcode_hap.count(bx_tag) == 0) continue;
+            // inspect the haplotype tag for the phase
+            switch(m_barcode_hap[bx_tag]) {
+            case 1:
+                phase_split.first.push_back(r);
+                break;
+            case 2: break;
+                phase_split.second.push_back(r);
+            }
+        }
+    }
     return phase_split;
 }
 
