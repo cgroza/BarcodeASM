@@ -24,13 +24,15 @@ size_t LocalAssemblyWindow::retrieveGenomewideReads() {
     std::cerr << b.first << " " << b.second << std::endl;
     total += b.second;
   }
-  std::cerr << "Sum " << total << std::endl;
+  std::cerr << "Total reads " << total << std::endl;
+  std::cerr << "Total barcodes " << m_barcode_count.size() << std::endl;
 
   std::cerr << "Barcode phase sets" << std::endl;
   for (const auto &b : m_barcode_phase) {
     std::cerr << b.first << " " << b.second << std::endl;
     total += b.second;
   }
+  std::cerr << "Total phase sets " << m_barcode_phase.size() << std::endl;
 
   std::cerr << "Barcode haplotype" << std::endl;
   for (const auto &b : m_barcode_hap) {
