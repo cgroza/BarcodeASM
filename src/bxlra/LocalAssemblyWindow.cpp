@@ -37,6 +37,7 @@ size_t LocalAssemblyWindow::retrieveGenomewideReads() {
     std::cerr << b.first << " " << b.second << std::endl;
     total += b.second;
   }
+  std::cerr << "Phased barcodes " << m_barcode_hap.size() << std::endl;
 
   // make sure to only import unique reads
   // tally already imported reads
@@ -166,13 +167,20 @@ PhaseSplit LocalAssemblyWindow::separateReadsByPhase() {
         std::string bx_tag;
         if(r.GetZTag("BX", bx_tag)) {
             // check if we have a phasing for this barcode
-            if(m_barcode_hap.count(bx_tag) == 0) continue;
+            if(m_barcode_hap.count(bx_tag) == 0) {
+                std::cerr << "Unphased barcode " << bx_tag << std::endl;
+                continue;
+            }
             // inspect the haplotype tag for the phase
             switch(m_barcode_hap[bx_tag]) {
             case 1:
                 phase_split.first.push_back(r);
                 break;
             case 2:
+                phase_split.second.push_back(r);
+                break;
+            default:            // add read to both phases if read is unphased
+                phase_split.first.push_back(r);
                 phase_split.second.push_back(r);
                 break;
             }
