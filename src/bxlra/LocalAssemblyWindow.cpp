@@ -62,28 +62,44 @@ size_t LocalAssemblyWindow::retrieveGenomewideReads() {
 
 size_t LocalAssemblyWindow::assembleReads() {
   retrieveGenomewideReads();
+
+  // Use the phased reads to do haploid assembly of the region
+  if(m_params.split_reads_by_phase) {
+      PhaseSplit split = separateReadsByPhase();
+      size_t h1 = assemblePhase(split.first, "1");
+      size_t h2 = assemblePhase(split.second, "2");
+      return h1 + h2;
+  }
+  // Assemble the diploid assembly of the region
+  else {
+      return assemblePhase(m_reads, "0");
+  }
+}
+
+size_t LocalAssemblyWindow::assemblePhase(BamReadVector &phased_reads, std::string phase) {
   SeqLib::FermiAssembler fermi;
 
   fermi.SetMinOverlap(m_params.min_overlap);
-  fermi.AddReads(m_reads);
-  if(m_params.aggressive_bubble_pop)
-      fermi.SetAggressiveTrim();
+  fermi.AddReads(phased_reads);
+  if (m_params.aggressive_bubble_pop)
+    fermi.SetAggressiveTrim();
   // fermi.CorrectAndFilterReads();
   fermi.PerformAssembly();
 
-  std::ofstream gfa_out(m_prefix + ".gfa");
+  std::ofstream gfa_out(m_prefix + "_p" + phase + ".gfa");
   fermi.WriteGFA(gfa_out);
   gfa_out.close();
 
   size_t count = 0;
-  for(auto contig : fermi.GetContigs()) {
-      std::stringstream ss;
-      ss << m_prefix << "_" << count;
-      m_contigs.push_back(SeqLib::UnalignedSequence(ss.str(), contig));
-      ++count;
+  for (auto contig : fermi.GetContigs()) {
+    std::stringstream ss;
+    ss << m_prefix << "_p" << phase << "_" << count;
+    m_contigs.push_back(SeqLib::UnalignedSequence(ss.str(), contig));
+    ++count;
   }
   return count;
 }
+
 
 void LocalAssemblyWindow::collectLocalBarcodes() {
   std::cerr << m_region.ToString(m_bam.Header()) << std::endl;
@@ -138,6 +154,13 @@ void LocalAssemblyWindow::sortContigs() {
                   return a.Seq.length() > b.Seq.length();
               });
 }
+
+PhaseSplit LocalAssemblyWindow::separateReadsByPhase() {
+    PhaseSplit phase_split;
+
+    return phase_split;
+}
+
 
 void LocalAssemblyWindow::clearReads() {
     m_reads.clear();

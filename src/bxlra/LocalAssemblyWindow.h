@@ -20,11 +20,13 @@ struct AssemblyParams {
     size_t min_overlap = 90;
     size_t min_contig_length = 200;
     size_t aggressive_bubble_pop = false;
+    bool split_reads_by_phase = false;
 };
 
 typedef std::unordered_map<BxBarcode, int> BxBarcodeCounts;
 typedef std::unordered_map<BxBarcode, int> BxBarcodePS;
 typedef std::unordered_map<BxBarcode, int> BxBarcodeHap;
+typedef std::pair<BamReadVector, BamReadVector> PhaseSplit;
 
 class LocalAssemblyWindow {
 public:
@@ -40,6 +42,8 @@ public:
 
   private:
     void sortContigs();
+    size_t assemblePhase(BamReadVector &phased_reads, std::string phase);
+    PhaseSplit separateReadsByPhase();
 
     AssemblyParams m_params;
     SeqLib::GenomicRegion m_region;
