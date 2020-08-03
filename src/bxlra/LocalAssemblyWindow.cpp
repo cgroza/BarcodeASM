@@ -171,6 +171,9 @@ PhaseSplit LocalAssemblyWindow::separateReadsByPhase() {
             // check if we have a phasing for this barcode
             if(m_barcode_hap.count(bx_tag) == 0) {
                 std::cerr << "Unphased barcode " << bx_tag << std::endl;
+                // add read to both phases if read is unphased
+                phase_split.first.push_back(r);
+                phase_split.second.push_back(r);
                 continue;
             }
             // inspect the haplotype tag for the phase
@@ -179,10 +182,6 @@ PhaseSplit LocalAssemblyWindow::separateReadsByPhase() {
                 phase_split.first.push_back(r);
                 break;
             case 2:
-                phase_split.second.push_back(r);
-                break;
-            default:            // add read to both phases if read is unphased
-                phase_split.first.push_back(r);
                 phase_split.second.push_back(r);
                 break;
             }
