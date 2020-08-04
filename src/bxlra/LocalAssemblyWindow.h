@@ -3,6 +3,7 @@
 
 #include "BxBamWalker.h"
 #include "SeqLib/BamReader.h"
+#include "SeqLib/BamRecord.h"
 #include "SeqLib/FermiAssembler.h"
 #include "SeqLib/GenomicRegion.h"
 #include "SeqLib/SeqLibUtils.h"
@@ -44,6 +45,7 @@ public:
     void sortContigs();
     size_t assemblePhase(BamReadVector &phased_reads, std::string phase);
     PhaseSplit separateReadsByPhase();
+    void fillPhasingData(SeqLib::BamRecord &bam_record, std::string &bx_tag);
 
     AssemblyParams m_params;
     SeqLib::GenomicRegion m_region;

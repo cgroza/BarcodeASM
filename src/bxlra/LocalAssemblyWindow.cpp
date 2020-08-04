@@ -128,23 +128,31 @@ void LocalAssemblyWindow::collectLocalBarcodes() {
 
               // barcode init
               m_barcode_count[bx_tag] = 1;
-
-              // barcode phase set init
-              int ps;
-              if(bam_record.GetIntTag("PS", ps)) {
-                  m_barcode_phase[bx_tag] = ps;
-
-                  // barcode haplotype init
-                  int hp;
-                  if(bam_record.GetIntTag("HP", hp))
-                      m_barcode_hap[bx_tag] = hp;
-              }
+              fillPhasingData(bam_record, bx_tag);
           }
-        else
-          m_barcode_count[bx_tag] = m_barcode_count[bx_tag] + 1;
+          else {
+              m_barcode_count[bx_tag] = m_barcode_count[bx_tag] + 1;
+              fillPhasingData(bam_record, bx_tag);
+          }
       }
     } else
       break;
+  }
+}
+
+void LocalAssemblyWindow::fillPhasingData(SeqLib::BamRecord &bam_record, std::string &bx_tag) {
+  // Do nothing if already filled
+  if(m_barcode_hap.count(bx_tag) == 1)
+    return;
+  // barcode phase set init
+  int ps;
+  if (bam_record.GetIntTag("PS", ps)) {
+    m_barcode_phase[bx_tag] = ps;
+
+    // barcode haplotype init
+    int hp;
+    if (bam_record.GetIntTag("HP", hp))
+      m_barcode_hap[bx_tag] = hp;
   }
 }
 
