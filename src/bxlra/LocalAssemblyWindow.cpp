@@ -178,7 +178,7 @@ PhaseSplit LocalAssemblyWindow::separateReadsByPhase() {
         if(r.GetZTag("BX", bx_tag)) {
             // check if we have a phasing for this barcode
             if(m_barcode_hap.count(bx_tag) == 0) {
-                std::cerr << "Unphased barcode " << bx_tag << std::endl;
+                // std::cerr << "Unphased barcode " << bx_tag << std::endl;
                 // add read to both phases if read is unphased
                 phase_split.first.push_back(r);
                 phase_split.second.push_back(r);
