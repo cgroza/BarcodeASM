@@ -24,8 +24,8 @@ To run `bxlra`, the following arguments are needed:
 + -o : minimum required read overlap during assembly `fermi-lite`
 + -P : pop bubbles in heterozygous regions (optional)
 + -S : separate reads by phase before assembly (optional)
-+ -a : import all reads belonging to the barcodes in the local assembly window
-+ -t : number of threads (needs 2GB memory per thread)
++ -a : import all reads belonging to the barcodes in the local assembly window (optional)
++ -t : number of threads (default is 1, needs 2GB memory per thread)
 
 
 The outputs are:
