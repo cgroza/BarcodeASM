@@ -12,7 +12,7 @@
 	branch = master
 [submodule "SeqLib"]
 	path = SeqLib
-	url = git@github.com:cgroza/SeqLib.git
+	url = https://github.com/cgroza/SeqLib.git
 [submodule "minigraph"]
 	path = minigraph
-	url = git@github.com:lh3/minigraph.git
+	url = https://github.com/lh3/minigraph.git
