@@ -2,6 +2,7 @@
 #define ALIGNMENT_COMMON_H
 
 #include "SeqLib/UnalignedSequence.h"
+#include "minigraph/minigraph.h"
 #include "minimap2/minimap.h"
 #include <string>
 

@@ -93,12 +93,11 @@ size_t LocalAssemblyWindow::assemblePhase(BamReadVector &phased_reads, std::stri
   // fermi.CorrectAndFilterReads();
   fermi.PerformAssembly();
 
-  // use this to write the file, and load gfa into minigraph
-  std::stringstream gfa_out;
-  std::ofstream gfa_out_file(m_prefix + "_p" + phase + ".gfa");
-  fermi.WriteGFA(gfa_out);
-  gfa_out_file << gfa_out.str();
+  std::string gfa_file_name = m_prefix + "_p" + phase + ".gfa";
+  std::ofstream gfa_out_file(gfa_file_name);
+  fermi.WriteGFA(gfa_out_file);
   gfa_out_file.close();
+
 
   size_t count = 0;
   for (auto contig : fermi.GetContigs()) {
@@ -107,6 +106,15 @@ size_t LocalAssemblyWindow::assemblePhase(BamReadVector &phased_reads, std::stri
     m_contigs.push_back(SeqLib::UnalignedSequence(ss.str(), contig));
     ++count;
   }
+
+  // load gfa file into minigraph
+  // TODO : look into FILE* fmemopen() to avoid disk IO when loading into
+  // minigraph
+
+  MinigraphAlignment minigraph_aln(gfa_file_name);
+  // Test minigraph alignment
+  minigraph_aln.alignSequence(m_contigs);
+
   return count;
 }
 

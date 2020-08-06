@@ -2,6 +2,7 @@
 #define LOCAL_ASSEMBLY_WINDOW_H
 
 #include "BxBamWalker.h"
+#include "MinigraphAlignment.h"
 #include "SeqLib/BamReader.h"
 #include "SeqLib/BamRecord.h"
 #include "SeqLib/FermiAssembler.h"
