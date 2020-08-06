@@ -7,13 +7,14 @@ bxlra_CPPFLAGS = \
 
 bxlra_LDADD = \
 	$(top_builddir)/minimap2/libminimap2.a \
+  $(top_builddir)/minigraph/libminigraph.so.1 \
 	$(top_builddir)/SeqLib/src/libseqlib.a \
 	$(top_builddir)/SeqLib/bwa/libbwa.a \
 	$(top_builddir)/SeqLib/htslib/libhts.a \
 	$(top_builddir)/SeqLib/fermi-lite/libfml.a \
 	-llzma -lbz2 -lz
 
-bxlra_SOURCES = bxlra.cpp BxBamWalker.cpp RegionFileReader.cpp LocalAssemblyWindow.cpp LocalAlignment.cpp ReadAlignment.cpp
+bxlra_SOURCES = bxlra.cpp BxBamWalker.cpp RegionFileReader.cpp LocalAssemblyWindow.cpp LocalAlignment.cpp ReadAlignment.cpp MinigraphAlignment.cpp
 
 install:
 	mkdir -p ../../bin && mv bxlra ../../bin

@@ -93,9 +93,12 @@ size_t LocalAssemblyWindow::assemblePhase(BamReadVector &phased_reads, std::stri
   // fermi.CorrectAndFilterReads();
   fermi.PerformAssembly();
 
-  std::ofstream gfa_out(m_prefix + "_p" + phase + ".gfa");
+  // use this to write the file, and load gfa into minigraph
+  std::stringstream gfa_out;
+  std::ofstream gfa_out_file(m_prefix + "_p" + phase + ".gfa");
   fermi.WriteGFA(gfa_out);
-  gfa_out.close();
+  gfa_out_file << gfa_out.str();
+  gfa_out_file.close();
 
   size_t count = 0;
   for (auto contig : fermi.GetContigs()) {
