@@ -61,6 +61,7 @@ size_t num_threads = 1;
 bool weird_reads_only = true;
 bool aggressive_bubble_pop = false;
 bool split_reads_by_phase = false;
+bool write_gfa = false;
 } // namespace opt
 
 int main(int argc, char **argv) {
@@ -78,7 +79,7 @@ int main(int argc, char **argv) {
 
   opterr = 0;
   int c;
-  while ((c = getopt(argc, argv, "SPat:b:B:r:g:o:")) != -1)
+  while ((c = getopt(argc, argv, "GSPat:b:B:r:g:o:")) != -1)
     switch (c) {
     case 't':
         try {
@@ -110,6 +111,9 @@ int main(int argc, char **argv) {
     case 'g':
       opt::reference_path = optarg;
       break;
+    case 'G':
+      opt::write_gfa = true;
+      break;
     case 'o':
       opt::min_overlap = std::stoi(optarg);
       break;
@@ -121,11 +125,13 @@ int main(int argc, char **argv) {
   params.min_overlap = opt::min_overlap;
   params.aggressive_bubble_pop = opt::aggressive_bubble_pop;
   params.split_reads_by_phase = opt::split_reads_by_phase;
+  params.write_gfa = opt::write_gfa;
 
   std::cerr << "Params o: " << params.min_overlap << std::endl
             << "Params P: " << params.aggressive_bubble_pop << std::endl
-            << "Params a: " << opt::weird_reads_only << std::endl
-            << "Params S: " << opt::split_reads_by_phase << std::endl;
+            << "Params a: " << !opt::weird_reads_only << std::endl
+            << "Params S: " << opt::split_reads_by_phase << std::endl
+            << "Params G: " << opt::write_gfa << std::endl;
 
   // Storage for thread pooled resources
   // These not be guarded by mutex, since they assigned to individual thread IDs

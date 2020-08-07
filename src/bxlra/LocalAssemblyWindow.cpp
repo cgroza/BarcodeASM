@@ -93,9 +93,12 @@ size_t LocalAssemblyWindow::assemblePhase(BamReadVector &phased_reads, std::stri
   // fermi.CorrectAndFilterReads();
   fermi.PerformAssembly();
 
-  std::ofstream gfa_out(m_prefix + "_p" + phase + ".gfa");
-  fermi.WriteGFA(gfa_out);
-  gfa_out.close();
+  // write GFA to disk if requested
+  if(m_params.write_gfa) {
+    std::ofstream gfa_out(m_prefix + "_p" + phase + ".gfa");
+    fermi.WriteGFA(gfa_out);
+    gfa_out.close();
+  }
 
   size_t count = 0;
   for (auto contig : fermi.GetContigs()) {

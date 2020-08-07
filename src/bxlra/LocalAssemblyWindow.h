@@ -22,6 +22,7 @@ struct AssemblyParams {
     size_t min_contig_length = 200;
     size_t aggressive_bubble_pop = false;
     bool split_reads_by_phase = false;
+    bool write_gfa = false;
 };
 
 typedef std::unordered_map<BxBarcode, int> BxBarcodeCounts;
