@@ -90,6 +90,7 @@ ContigMatePairGraph ReadAlignment::alignReads(const BamReadVector &reads) {
           //   0xf]);
       free(r->p);
     }
+    free(reg);
   }
 
   // clear empty entries or that are fully within one contig
@@ -118,4 +119,25 @@ ContigMatePairGraph ReadAlignment::alignReads(const BamReadVector &reads) {
   contig_mate_pair_grah.writeGFA(gfa_out);
   gfa_out.close();
   return contig_mate_pair_grah;
+}
+
+UnitigHits ReadAlignment::alignSequence(SeqLib::UnalignedSequence seq) {
+  UnitigHits unitig_hits;
+  mm_tbuf_t *thread_buf = mm_tbuf_init();
+  int num_hits;
+
+  mm_reg1_t *reg = mm_map(m_minimap_index, seq.Seq.length(), seq.Seq.c_str(),
+                          &num_hits, thread_buf, &m_map_opt, seq.Name.c_str());
+  for(size_t i = 0; i < num_hits; i++) {
+    mm_reg1_t *r = &reg[i];
+    assert(r->p); // with MM_F_CIGAR, this should not be NULL
+
+    unitig_hits.emplace_back(m_minimap_index->seq[r->rid].name);
+
+    free(r->p);
+  }
+  free(reg);
+  mm_tbuf_destroy(thread_buf);
+
+  return unitig_hits;
 }

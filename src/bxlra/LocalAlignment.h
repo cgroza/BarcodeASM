@@ -14,6 +14,12 @@
 #include <sstream>
 #include "AlignmentCommon.h"
 
+struct LocalAlignmentParams {
+  int max_join_long = 20000;
+  int max_join_short = 2000;
+  int min_join_flank_sc = 1000;
+  float min_join_flank_ratio = 0.5f;
+};
 
 class LocalAlignment {
 public:
@@ -50,6 +56,8 @@ public:
                        MinimapAlignment,
                        UnalignedSequenceHash,
                        UnalignedSequenceEqualsTo> m_alignments;
+
+    LocalAlignmentParams m_params;
 };
 
 #endif
