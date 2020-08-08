@@ -115,9 +115,10 @@ ContigMatePairGraph ReadAlignment::alignReads(const BamReadVector &reads) {
       contigs.emplace(m_names[i]);
 
   ContigMatePairGraph contig_mate_pair_grah(contigs, read_contig_map);
-  std::ofstream gfa_out(m_prefix + "_mates.gfa");
-  contig_mate_pair_grah.writeGFA(gfa_out);
-  gfa_out.close();
+  // DISABLE THIS FEATURE FOR NOW
+  // std::ofstream gfa_out(m_prefix + "_mates.gfa");
+  // contig_mate_pair_grah.writeGFA(gfa_out);
+  // gfa_out.close();
   return contig_mate_pair_grah;
 }
 
