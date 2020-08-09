@@ -124,7 +124,7 @@ int main(int argc, char **argv) {
   std::mutex fasta_mutex;
 
   // file to write TE hits in
-  std::ofstream hits("hits.fa");
+  std::ofstream hits("hits.tsv");
   std::mutex hits_mutex;
 
   // file to write alignments

@@ -18,10 +18,10 @@ size_t LocalAssemblyWindow::retrieveGenomewideReads() {
   std::cerr << "Pre barcode collection: " << m_reads.size() << std::endl;
 
   // Barcode frequency in assembly window
-  std::cerr << "Barcode frequency" <<  std::endl;
+  // std::cerr << "Barcode frequency" <<  std::endl;
   size_t total = 0;
   for (const auto &b : m_barcode_count) {
-    std::cerr << b.first << " " << b.second << std::endl;
+    // std::cerr << b.first << " " << b.second << std::endl;
     total += b.second;
   }
   std::cerr << "Total reads " << total << std::endl;
@@ -29,14 +29,14 @@ size_t LocalAssemblyWindow::retrieveGenomewideReads() {
 
   std::cerr << "Barcode phase sets" << std::endl;
   for (const auto &b : m_barcode_phase) {
-    std::cerr << b.first << " " << b.second << std::endl;
+    // std::cerr << b.first << " " << b.second << std::endl;
     total += b.second;
   }
   std::cerr << "Total phase sets " << m_barcode_phase.size() << std::endl;
 
   std::cerr << "Barcode haplotype" << std::endl;
   for (const auto &b : m_barcode_hap) {
-    std::cerr << b.first << " " << b.second << std::endl;
+    // std::cerr << b.first << " " << b.second << std::endl;
     total += b.second;
   }
   std::cerr << "Phased barcodes " << m_barcode_hap.size() << std::endl;

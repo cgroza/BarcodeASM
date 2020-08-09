@@ -174,8 +174,8 @@ void ContigAlignment::detectTEs(std::ostream &out) {
     UnitigHits contig_hits = alignSequence(alu);
 
     for(auto& hit : contig_hits)
-      out << "ALU\t" << hit.unitig_name << "\t"
-                << hit.tl << "\t" << hit.ts << "\t" << hit.te << "\t"
-                << hit.ql << "\t" << hit.qs << "\t" << hit.qe << "\t"
+      out << "ALU " << hit.unitig_name << " "
+                << hit.tl << " " << hit.ts << " " << hit.te << " "
+                << hit.ql << " " << hit.qs << " " << hit.qe << " "
                 << hit.cigar << std::endl;
 }
