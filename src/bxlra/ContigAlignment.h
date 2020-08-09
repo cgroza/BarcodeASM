@@ -35,13 +35,14 @@ private:
     std::unordered_set<Edge, EdgeHash> m_edges;
 };
 
-class ReadAlignment {
-    public:
-    ReadAlignment(const SeqLib::UnalignedSequenceVector &contigs, const std::string &prefix);
-    ~ReadAlignment();
+class ContigAlignment {
+public:
+    ContigAlignment(const SeqLib::UnalignedSequenceVector &contigs, const std::string &prefix);
+    ~ContigAlignment();
 
     ContigMatePairGraph alignReads(const BamReadVector &reads);
     UnitigHits alignSequence(SeqLib::UnalignedSequence seq);
+    void detectTEs();
 
     // default minimap2 parameters
     const int MINIMIZER_K = 15;
@@ -49,7 +50,10 @@ class ReadAlignment {
     const int BUCKET_BITS = 64;
     const int IS_HPC = 0;
 
-  private:
+    // Reference ALU sequence, used for detecting contigs with potential Alu
+    // inserts
+    static const std::string ALU_REF;
+private:
     std::string m_prefix;
     char** m_sequences;         // contigs to be aligned
     char** m_names;             // names of contigs

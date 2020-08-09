@@ -1,6 +1,14 @@
-#include "ReadAlignment.h"
+#include "ContigAlignment.h"
+#include "SeqLib/UnalignedSequence.h"
 #include <ostream>
 #include <utility>
+
+const std::string ContigAlignment::ALU_REF =
+    "GGCCGGGCGCGGTGGCTCACGCCTGTAATCCCAGCACTTTGGGAGGCCGAGGCGGGCGGATCACGAGGTC"
+    "AGGAGATCGAGACCATCCTGGCTAACACGGTGAAACCCCGTCTCTACTAAAAATACAAAAAATTAGCCGG"
+    "GCGTGGTGGCGGGCGCCTGTAGTCCCAGCTACTCGGGAGGCTGAGGCAGGAGAATGGCGTGAACCCGGGA"
+    "GGCGGAGCTTGCAGTGAGCCGAGATCGCGCCACTGCACTCCAGCCTGGGCGACAGAGCGAGACTCCGTCT"
+    "C";
 
 ContigMatePairGraph::ContigMatePairGraph(std::unordered_set<std::string> &contigs,
                                          MatePairContigMap &mate_contig_map) :
@@ -25,7 +33,7 @@ void ContigMatePairGraph::writeGFA(std::ostream &out){
         out << "L\t" << e.first << "\t+\t" << e.second << "\t+\t*" << std::endl;
 }
 
-ReadAlignment::ReadAlignment(const SeqLib::UnalignedSequenceVector &contigs, const std::string &prefix)
+ContigAlignment::ContigAlignment(const SeqLib::UnalignedSequenceVector &contigs, const std::string &prefix)
     : m_prefix(prefix) {
   m_num_seqs = contigs.size();
   m_sequences = new char *[m_num_seqs];
@@ -53,7 +61,7 @@ ReadAlignment::ReadAlignment(const SeqLib::UnalignedSequenceVector &contigs, con
   mm_idx_stat(m_minimap_index);
 }
 
-ReadAlignment::~ReadAlignment() {
+ContigAlignment::~ContigAlignment() {
   // free allocated memory
   mm_idx_destroy(m_minimap_index);
   for(size_t i = 0; i < m_num_seqs; i++) {
@@ -64,7 +72,7 @@ ReadAlignment::~ReadAlignment() {
   delete m_names;
 }
 
-ContigMatePairGraph ReadAlignment::alignReads(const BamReadVector &reads) {
+ContigMatePairGraph ContigAlignment::alignReads(const BamReadVector &reads) {
   MatePairContigMap read_contig_map;
   mm_tbuf_t *thread_buf = mm_tbuf_init();
   for (auto &read : reads) {
@@ -122,7 +130,7 @@ ContigMatePairGraph ReadAlignment::alignReads(const BamReadVector &reads) {
   return contig_mate_pair_grah;
 }
 
-UnitigHits ReadAlignment::alignSequence(SeqLib::UnalignedSequence seq) {
+UnitigHits ContigAlignment::alignSequence(SeqLib::UnalignedSequence seq) {
   UnitigHits unitig_hits;
   mm_tbuf_t *thread_buf = mm_tbuf_init();
   int num_hits;
@@ -141,4 +149,12 @@ UnitigHits ReadAlignment::alignSequence(SeqLib::UnalignedSequence seq) {
   mm_tbuf_destroy(thread_buf);
 
   return unitig_hits;
+}
+
+void ContigAlignment::detectTEs() {
+    SeqLib::UnalignedSequence alu("ALU-REF", ALU_REF);
+    UnitigHits contig_hits = alignSequence(alu);
+
+    for(auto& hit : contig_hits)
+        std::cerr << "ALU: " << hit << std::endl;
 }
