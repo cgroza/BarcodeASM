@@ -158,6 +158,8 @@ UnitigHits ContigAlignment::alignSequence(SeqLib::UnalignedSequence seq) {
     for (int i = 0; i < r->p->n_cigar; ++i)
       ss << (r->p->cigar[i] >> 4) << ("MIDNSH"[r->p->cigar[i] & 0xf]);
 
+    hit.strand = "+-"[r->rev];
+
     hit.cigar = ss.str();
     unitig_hits.emplace_back(hit);
 
@@ -177,5 +179,5 @@ void ContigAlignment::detectTEs(std::ostream &out) {
       out << "ALU " << hit.unitig_name << " "
                 << hit.tl << " " << hit.ts << " " << hit.te << " "
                 << hit.ql << " " << hit.qs << " " << hit.qe << " "
-                << hit.cigar << std::endl;
+                << hit.strand << " " << hit.cigar << std::endl;
 }

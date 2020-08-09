@@ -29,6 +29,7 @@ struct UnitigHit {
     size_t ql, qs, qe;
     size_t tl, ts, te;
     std::string cigar;
+    char strand;
 };
 
 #endif
