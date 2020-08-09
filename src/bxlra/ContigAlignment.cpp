@@ -1,6 +1,8 @@
 #include "ContigAlignment.h"
+#include "AlignmentCommon.h"
 #include "SeqLib/UnalignedSequence.h"
 #include <ostream>
+#include <sstream>
 #include <utility>
 
 const std::string ContigAlignment::ALU_REF =
@@ -141,7 +143,23 @@ UnitigHits ContigAlignment::alignSequence(SeqLib::UnalignedSequence seq) {
     mm_reg1_t *r = &reg[i];
     assert(r->p); // with MM_F_CIGAR, this should not be NULL
 
-    unitig_hits.emplace_back(m_minimap_index->seq[r->rid].name);
+    UnitigHit hit;
+    // query sequence
+    hit.unitig_name = m_minimap_index->seq[r->rid].name;
+    hit.ql = seq.Seq.length();
+    hit.qs = r -> qs; hit.qe = r->qe;
+
+    // target sequence
+    hit.tl = m_minimap_index->seq[r->rid].len;
+    hit.ts = r -> rs; hit.te = r -> re;
+
+    // cigar
+    std::stringstream ss;
+    for (int i = 0; i < r->p->n_cigar; ++i)
+      ss << (r->p->cigar[i] >> 4) << ("MIDNSH"[r->p->cigar[i] & 0xf]);
+
+    hit.cigar = ss.str();
+    unitig_hits.emplace_back(hit);
 
     free(r->p);
   }
@@ -151,10 +169,13 @@ UnitigHits ContigAlignment::alignSequence(SeqLib::UnalignedSequence seq) {
   return unitig_hits;
 }
 
-void ContigAlignment::detectTEs() {
+void ContigAlignment::detectTEs(std::ostream &out) {
     SeqLib::UnalignedSequence alu("ALU-REF", ALU_REF);
     UnitigHits contig_hits = alignSequence(alu);
 
     for(auto& hit : contig_hits)
-        std::cerr << "ALU: " << hit << std::endl;
+      out << "ALU\t" << hit.unitig_name << "\t"
+                << hit.tl << "\t" << hit.ts << "\t" << hit.te << "\t"
+                << hit.ql << "\t" << hit.qs << "\t" << hit.qe << "\t"
+                << hit.cigar << std::endl;
 }

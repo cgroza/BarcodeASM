@@ -24,4 +24,11 @@ struct UnalignedSequenceEqualsTo {
   }
 };
 
+struct UnitigHit {
+    std::string unitig_name;
+    size_t ql, qs, qe;
+    size_t tl, ts, te;
+    std::string cigar;
+};
+
 #endif

@@ -123,6 +123,10 @@ int main(int argc, char **argv) {
   std::ofstream fasta("contigs.fa");
   std::mutex fasta_mutex;
 
+  // file to write TE hits in
+  std::ofstream hits("hits.fa");
+  std::mutex hits_mutex;
+
   // file to write alignments
   std::ofstream alns("alignments.tsv");
   std::mutex alns_mutex;
@@ -133,7 +137,9 @@ int main(int argc, char **argv) {
     std::string chrom = region.ChrName(bam_readers[0]->Header());
     std::cerr << "Running " << chrom << " " << region.pos1 << " " << region.pos2 << std::endl;
     auto future = thread_pool.push([region, &fasta, &fasta_mutex,
-                                    &alns, &alns_mutex, &params,
+                                    &alns, &alns_mutex,
+                                    &hits, &hits_mutex,
+                                    &params,
                                     &ref_genomes, &bam_readers,
                                     &bx_bam_walkers](int id) {
 
@@ -144,7 +150,10 @@ int main(int argc, char **argv) {
 
       ContigAlignment read_aln(local_win.getContigs(), local_win.getPrefix());
       read_aln.alignReads(local_win.getReads());
-      read_aln.detectTEs();
+
+      hits_mutex.lock();
+      read_aln.detectTEs(hits);
+      hits_mutex.unlock();
 
       std::cerr << "Reads: " << local_win.getReads().size() << std::endl;
       local_win.clearReads();

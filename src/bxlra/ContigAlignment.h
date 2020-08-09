@@ -12,7 +12,7 @@
 
 typedef std::unordered_map<std::string, std::unordered_set<std::string>> MatePairContigMap;
 typedef std::pair<std::string, std::string> Edge;
-typedef std::vector<std::string> UnitigHits;
+typedef std::vector<UnitigHit> UnitigHits;
 
 struct EdgeHash {
   // Property: return the same value for <s1, s2> and <s2, s1>.
@@ -42,7 +42,7 @@ public:
 
     ContigMatePairGraph alignReads(const BamReadVector &reads);
     UnitigHits alignSequence(SeqLib::UnalignedSequence seq);
-    void detectTEs();
+    void detectTEs(std::ostream &out);
 
     // default minimap2 parameters
     const int MINIMIZER_K = 15;
