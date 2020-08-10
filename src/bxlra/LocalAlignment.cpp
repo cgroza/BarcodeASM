@@ -77,7 +77,7 @@ size_t LocalAlignment::writeAlignments(std::ostream &out) {
 
           target_record << m_target_name << " " << m_minimap_index->seq->len << " ";
 
-          hit_record << j << " ";
+          hit_record << j << " " << "+-"[reg -> rev] << " ";
 
           mm_reg1_t *r = &reg[j];
           assert(r->p); // with MM_F_CIGAR, this should not be NULL

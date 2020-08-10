@@ -38,7 +38,7 @@ public:
     const int IS_HPC = 0;
 
     static std::string getAlignmentHeader(){
-        return "TName TLength TStart TEnd QName QLength QStart QEnd Hit CIGAR";
+        return "TName TLength TStart TEnd QName QLength QStart QEnd Hit Strand CIGAR";
     }
 
   private:

@@ -89,11 +89,15 @@ int main(int argc, char **argv) {
   params.split_reads_by_phase = opt::split_reads_by_phase;
   params.write_gfa = opt::write_gfa;
 
-  std::cerr << "Params o: " << params.min_overlap << std::endl
+  std::cerr << "Params r: " << opt::regions_path << std::endl
+            << "Params b: " << opt::bam_path << std::endl
+            << "Params B: " << opt::bx_bam_path << std::endl
+            << "Params o: " << params.min_overlap << std::endl
             << "Params P: " << params.aggressive_bubble_pop << std::endl
             << "Params a: " << !opt::weird_reads_only << std::endl
             << "Params S: " << opt::split_reads_by_phase << std::endl
-            << "Params G: " << opt::write_gfa << std::endl;
+            << "Params G: " << opt::write_gfa << std::endl
+            << "Params F: " << opt::detect_seqs_fa << std::endl;
 
   // Storage for thread pooled resources
   // These not be guarded by mutex, since they assigned to individual thread IDs
