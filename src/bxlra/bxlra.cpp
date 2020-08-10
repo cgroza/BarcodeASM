@@ -1,8 +1,8 @@
 #include "BxBamWalker.h"
 #include "CTPL/ctpl_stl.h"
+#include "ContigAlignment.h"
 #include "LocalAlignment.h"
 #include "LocalAssemblyWindow.h"
-#include "ContigAlignment.h"
 #include "RegionFileReader.h"
 #include "SeqLib/BamRecord.h"
 #include "SeqLib/RefGenome.h"
@@ -18,6 +18,8 @@
 #include <stdexcept>
 #include <unistd.h>
 #include <vector>
+#include "SeqLib/FastqReader.h"
+
 
 namespace opt {
 std::string bam_path;
@@ -30,12 +32,13 @@ bool weird_reads_only = true;
 bool aggressive_bubble_pop = false;
 bool split_reads_by_phase = false;
 bool write_gfa = false;
+std::string detect_seqs_fa;
 } // namespace opt
 
 int main(int argc, char **argv) {
   opterr = 0;
   int c;
-  while ((c = getopt(argc, argv, "GSPat:b:B:r:g:o:")) != -1)
+  while ((c = getopt(argc, argv, "GSPat:b:B:r:g:o:F:")) != -1)
     switch (c) {
     case 't':
         try {
@@ -73,6 +76,9 @@ int main(int argc, char **argv) {
     case 'o':
       opt::min_overlap = std::stoi(optarg);
       break;
+    case 'F' :
+      opt::detect_seqs_fa = optarg;
+      break;
     default:
       abort();
     }
@@ -94,6 +100,15 @@ int main(int argc, char **argv) {
   std::vector<SeqLib::BamReader*> bam_readers(opt::num_threads);
   std::vector<BxBamWalker*> bx_bam_walkers(opt::num_threads);
   std::vector<SeqLib::RefGenome*> ref_genomes(opt::num_threads);
+
+  // load sequences to be detected in contigs
+  SeqLib::UnalignedSequenceVector detect_seqs;
+  if(opt::detect_seqs_fa.size() > 0) {
+      SeqLib::FastqReader seq_fa(opt::detect_seqs_fa);
+      SeqLib::UnalignedSequence s;
+      while(seq_fa.GetNextSequence(s))
+          detect_seqs.push_back(s);
+  }
 
   // initialize pooled bam, bx_bam, and genome readers
   for(size_t i = 0; i < opt::num_threads; i++) {
@@ -139,7 +154,7 @@ int main(int argc, char **argv) {
     auto future = thread_pool.push([region, &fasta, &fasta_mutex,
                                     &alns, &alns_mutex,
                                     &hits, &hits_mutex,
-                                    &params,
+                                    &params, &detect_seqs,
                                     &ref_genomes, &bam_readers,
                                     &bx_bam_walkers](int id) {
 
@@ -152,7 +167,7 @@ int main(int argc, char **argv) {
       read_aln.alignReads(local_win.getReads());
 
       hits_mutex.lock();
-      read_aln.detectTEs(hits);
+      read_aln.detectSequences(detect_seqs, hits);
       hits_mutex.unlock();
 
       std::cerr << "Reads: " << local_win.getReads().size() << std::endl;

@@ -42,7 +42,7 @@ public:
 
     ContigMatePairGraph alignReads(const BamReadVector &reads);
     UnitigHits alignSequence(SeqLib::UnalignedSequence seq);
-    void detectTEs(std::ostream &out);
+    void detectSequences(SeqLib::UnalignedSequenceVector seqs,std::ostream &out);
 
     // default minimap2 parameters
     const int MINIMIZER_K = 15;

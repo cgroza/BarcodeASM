@@ -171,13 +171,13 @@ UnitigHits ContigAlignment::alignSequence(SeqLib::UnalignedSequence seq) {
   return unitig_hits;
 }
 
-void ContigAlignment::detectTEs(std::ostream &out) {
-    SeqLib::UnalignedSequence alu("ALU-REF", ALU_REF);
-    UnitigHits contig_hits = alignSequence(alu);
+void ContigAlignment::detectSequences(SeqLib::UnalignedSequenceVector seqs, std::ostream &out) {
+    for(auto &s : seqs) {
+      UnitigHits contig_hits = alignSequence(s);
 
-    for(auto& hit : contig_hits)
-      out << "ALU " << hit.unitig_name << " "
-                << hit.tl << " " << hit.ts << " " << hit.te << " "
-                << hit.ql << " " << hit.qs << " " << hit.qe << " "
-                << hit.strand << " " << hit.cigar << std::endl;
+      for(auto &hit : contig_hits)
+        out << s.Name << " " << hit.unitig_name << " " << hit.tl << " " << hit.ts
+            << " " << hit.te << " " << hit.ql << " " << hit.qs << " " << hit.qe
+            << " " << hit.strand << " " << hit.cigar << std::endl;
+    }
 }

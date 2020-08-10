@@ -37,7 +37,7 @@ public:
     const int BUCKET_BITS = 64;
     const int IS_HPC = 0;
 
-    static std::string getAlignmentHeader(){ 
+    static std::string getAlignmentHeader(){
         return "TName TLength TStart TEnd QName QLength QStart QEnd Hit CIGAR";
     }
 

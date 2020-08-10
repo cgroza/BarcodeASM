@@ -33,15 +33,15 @@ void LocalAlignment::setupIndex(std::string target_sequence) {
   // update the mapping options
   mm_mapopt_update(&m_map_opt, m_minimap_index);
   mm_idx_stat(m_minimap_index);
-  }
+}
 
 LocalAlignment::~LocalAlignment() {
-    // free allocated memory 
+    // free allocated memory
     mm_idx_destroy(m_minimap_index);
     free(m_local_sequence);
 
     for (auto &aln : m_alignments) {
-      for (int j = 0; j < aln.second.num_hits; ++j) 
+      for (int j = 0; j < aln.second.num_hits; ++j)
         free(aln.second.reg[j].p);
       free(aln.second.reg);
     }
