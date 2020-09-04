@@ -28,7 +28,8 @@ struct AssemblyParams {
 typedef std::unordered_map<BxBarcode, int> BxBarcodeCounts;
 typedef std::unordered_map<BxBarcode, int> BxBarcodePS;
 typedef std::unordered_map<BxBarcode, int> BxBarcodeHap;
-typedef std::pair<BamReadVector, BamReadVector> PhaseSplit;
+// first phase reads, first phase set ID, second phase reads, second phase set ID
+typedef std::tuple<BamReadVector, int, BamReadVector, int> PhaseSplit;
 
 class LocalAssemblyWindow {
 public:
@@ -44,7 +45,7 @@ public:
 
   private:
     void sortContigs();
-    size_t assemblePhase(BamReadVector &phased_reads, std::string phase);
+    size_t assemblePhase(BamReadVector &phased_reads, std::string phase, int phase_set);
     PhaseSplit separateReadsByPhase();
     void fillPhasingData(SeqLib::BamRecord &bam_record, std::string &bx_tag);
 

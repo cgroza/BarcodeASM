@@ -1,4 +1,4 @@
-# bxlra - BX local assembler
+# bxlra - BX local read assembler
 
 This program uses `fermi-lite` and bead barcode information from the 10X
 sequencing protocol to create local assemblies of target regions. We attempt to

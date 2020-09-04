@@ -1,5 +1,6 @@
 #include "LocalAssemblyWindow.h"
 #include "BxBamWalker.h"
+#include <sstream>
 
 LocalAssemblyWindow::LocalAssemblyWindow(SeqLib::GenomicRegion region,
                                          SeqLib::BamReader bam,
@@ -70,20 +71,25 @@ size_t LocalAssemblyWindow::assembleReads() {
   if(m_params.split_reads_by_phase) {
       PhaseSplit split = separateReadsByPhase();
 
-      std::cerr << "Phase 1 reads " << split.first.size() << std::endl;
-      std::cerr << "Phase 2 reads " << split.second.size() << std::endl;
+      BamReadVector &first_phase = std::get<0>(split);
+      int &first_phase_set = std::get<1>(split);
+      BamReadVector &second_phase = std::get<2>(split);
+      int &second_phase_set = std::get<3>(split);
 
-      size_t h1 = assemblePhase(split.first, "1");
-      size_t h2 = assemblePhase(split.second, "2");
+      std::cerr << "Phase 1 reads " << first_phase.size() << " in read set " << first_phase_set << std::endl;
+      std::cerr << "Phase 2 reads " << second_phase.size() << " in read set " << second_phase_set << std::endl;
+
+      size_t h1 = assemblePhase(first_phase, "1", first_phase_set);
+      size_t h2 = assemblePhase(second_phase, "2", second_phase_set);
       return h1 + h2;
   }
   // Assemble the diploid assembly of the region
   else {
-      return assemblePhase(m_reads, "0");
+      return assemblePhase(m_reads, "0", 0);
   }
 }
 
-size_t LocalAssemblyWindow::assemblePhase(BamReadVector &phased_reads, std::string phase) {
+size_t LocalAssemblyWindow::assemblePhase(BamReadVector &phased_reads, std::string phase, int phase_set) {
   SeqLib::FermiAssembler fermi;
 
   fermi.SetMinOverlap(m_params.min_overlap);
@@ -93,9 +99,14 @@ size_t LocalAssemblyWindow::assemblePhase(BamReadVector &phased_reads, std::stri
   // fermi.CorrectAndFilterReads();
   fermi.PerformAssembly();
 
+  // prefix name for this phase in this assembly window
+  std::stringstream s;
+  s << m_prefix << "_PS" << phase_set << "_HP" + phase;
+  std::string phase_prefix = s.str();
+
   // write GFA to disk if requested
-  if(m_params.write_gfa) {
-    std::ofstream gfa_out(m_prefix + "_p" + phase + ".gfa");
+  if (m_params.write_gfa) {
+    std::ofstream gfa_out(phase_prefix +  ".gfa");
     fermi.WriteGFA(gfa_out);
     gfa_out.close();
   }
@@ -103,7 +114,7 @@ size_t LocalAssemblyWindow::assemblePhase(BamReadVector &phased_reads, std::stri
   size_t count = 0;
   for (auto contig : fermi.GetContigs()) {
     std::stringstream ss;
-    ss << m_prefix << "_p" << phase << "_" << count;
+    ss << phase_prefix << "_" << count;
     m_contigs.push_back(SeqLib::UnalignedSequence(ss.str(), contig));
     ++count;
   }
@@ -175,6 +186,11 @@ void LocalAssemblyWindow::sortContigs() {
 
 PhaseSplit LocalAssemblyWindow::separateReadsByPhase() {
     PhaseSplit phase_split;
+    BamReadVector &first_phase = std::get<0>(phase_split);
+    int &first_phase_set = std::get<1>(phase_split);
+    BamReadVector &second_phase = std::get<2>(phase_split);
+    int &second_phase_set = std::get<3>(phase_split);
+
     // run through the reads and split according to barcode/phase association
     for(auto &r : m_reads) {
         std::string bx_tag;
@@ -183,17 +199,19 @@ PhaseSplit LocalAssemblyWindow::separateReadsByPhase() {
             if(m_barcode_hap.count(bx_tag) == 0) {
                 // std::cerr << "Unphased barcode " << bx_tag << std::endl;
                 // add read to both phases if read is unphased
-                phase_split.first.push_back(r);
-                phase_split.second.push_back(r);
+                first_phase.push_back(r);
+                second_phase.push_back(r);
                 continue;
             }
-            // inspect the haplotype tag for the phase
+            // inspect the haplotype tag for the phase, and assign phase sets
             switch(m_barcode_hap[bx_tag]) {
             case 1:
-                phase_split.first.push_back(r);
+                first_phase.push_back(r);
+                first_phase_set = m_barcode_phase[bx_tag];
                 break;
             case 2:
-                phase_split.second.push_back(r);
+                second_phase.push_back(r);
+                second_phase_set = m_barcode_phase[bx_tag];
                 break;
             }
         }
