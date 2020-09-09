@@ -167,6 +167,12 @@ int main(int argc, char **argv) {
 
       local_win.assembleReads();
 
+      std::cerr << "Contigs: " << local_win.getContigs().size() << std::endl;
+      if (local_win.getContigs().size() == 0) {
+        std::cerr << "No contigs for " << local_win.getPrefix() << std::endl;
+        return;
+      }
+
       ContigAlignment read_aln(local_win.getContigs(), local_win.getPrefix());
       read_aln.alignReads(local_win.getReads());
 
@@ -176,7 +182,6 @@ int main(int argc, char **argv) {
 
       std::cerr << "Reads: " << local_win.getReads().size() << std::endl;
       local_win.clearReads();
-      std::cerr << "Contigs: " << local_win.getContigs().size() << std::endl;
 
       // MUTEX: only one thread must write to the fasta file at a time
       fasta_mutex.lock();
