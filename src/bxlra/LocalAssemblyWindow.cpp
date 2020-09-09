@@ -1,6 +1,5 @@
 #include "LocalAssemblyWindow.h"
 #include "BxBamWalker.h"
-#include <sstream>
 
 LocalAssemblyWindow::LocalAssemblyWindow(SeqLib::GenomicRegion region,
                                          SeqLib::BamReader bam,
