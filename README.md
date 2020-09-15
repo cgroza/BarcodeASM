@@ -28,8 +28,9 @@ To run `bxlra`, the following arguments are needed:
 + -g : path to the genome FASTA file
 + -G : output GFA for each assembly window
 + -o : minimum required read overlap during assembly `fermi-lite`
-+ -P : pop bubbles in heterozygous regions (optional)
++ -P : pop small bubbles in heterozygous regions (optional). Keeps the larger bubbles.
 + -S : separate reads by phase before assembly (optional)
++ -o : minimum overlap between reads (default 30)
 + -a : import all reads belonging to the barcodes in the local assembly window
   (optional)
 + -t : number of threads (default is 1, needs 2GB memory per thread)
@@ -41,4 +42,5 @@ The outputs are:
   unphased)
 + `alignments.tsv`: file describing the alignment of assembled contigs to the
   local window
++ `hits.tsv` : TE library (provided by -F) alignment hits against the assembled contigs for each window
 + local_window.gfa : GFA file for each local window that contains the assembly graph
