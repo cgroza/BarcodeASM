@@ -5,11 +5,16 @@ import Bio.Seq
 import vcfpy
 import argparse
 
-def extract_vcf_records(sample_name, alignments_path, contigs_path, ref_fasta_path, vcf_template_path, vcf_out_path, min_insert_size = 50):
+def extract_vcf_records(sample_name,
+                        # input paths
+                        alignments_path, contigs_path, ref_fasta_path, vcf_template_path,
+                        # output paths
+                        vcf_out_path, selected_contigs_path, min_insert_size = 50):
     records = []
 
     ref_fasta = pysam.FastaFile(ref_fasta_path)
     contig_fasta = pysam.FastaFile(contigs_path)
+    selected_contig_fasta = open(selected_contigs_path, "w")
     alns = pandas.read_csv(alignments_path, sep = " ")
 
     reader = vcfpy.Reader.from_path(vcf_template_path)
@@ -79,7 +84,7 @@ def extract_vcf_records(sample_name, alignments_path, contigs_path, ref_fasta_pa
                     # Generate pysam.VariantRecord
 
                     # need to check conversion from 0-based coordinates to 1-based
-                    ref_allele = ref_seq[target_pos - 1]
+                    ref_allele = ref_seq[target_pos]
                     alt_allele = ref_allele + query_seq[query_pos:query_pos + op[0]]
 
                     gt = ""
@@ -90,7 +95,7 @@ def extract_vcf_records(sample_name, alignments_path, contigs_path, ref_fasta_pa
                     else:
                         gt = "0/1"
 
-                    rec = vcfpy.Record(CHROM = ref_chrom, POS = ref_start + target_pos, ID = [query_name],
+                    rec = vcfpy.Record(CHROM = ref_chrom, POS = ref_start + target_pos + 1, ID = [query_name],
                                     REF = ref_allele, ALT = [vcfpy.Substitution("INS", alt_allele)],
                                     QUAL = 999, FILTER = ["PASS"], INFO = {}, FORMAT =
                                        ["GT", "SVLEN", "PS", "HP", "CIGAR", "STRAND", "CONTIG_START"],
@@ -103,31 +108,40 @@ def extract_vcf_records(sample_name, alignments_path, contigs_path, ref_fasta_pa
                                     )
                     records.append(rec)
                     writer.write_record(rec)
+                    selected_contig_fasta.writelines([">" + query_name + "\n", query_seq + "\n"])
                 query_pos += op[0]
-
+    selected_contig_fasta.close()
     return records
 
-
-
 parser = argparse.ArgumentParser("Extract a VCF file from bxlra contig local alignments.")
-parser.add_argument("--sample", metavar="sample", type = str, nargs = 1, help = "Sample name")
-parser.add_argument("--ref", metavar="ref", type = str, nargs = 1, help = "Reference genome used with bxlra")
-parser.add_argument("--alns", metavar="alns", type = str, nargs = 1, help = "alignments.tsv from bxlra")
-parser.add_argument("--contigs", metavar="contigs", type = str, nargs = 1, help = "contigs.fa from bxlra")
-parser.add_argument("--vcf_template", metavar="vcf_template", type = str, nargs = 1, help = "VCF template for you reference genome")
-parser.add_argument("--vcf_out", metavar="vcf_out", type = str, nargs = 1, help = "VCF path for the output", default = "out.vcf")
-parser.add_argument("--min_insert", metavar="min_insert", type = int, nargs = 1, help = "Minimum insertion size to extract", default = 50)
+parser.add_argument("--sample", metavar="sample", type = str, nargs = 1,
+                    help = "Sample name")
+parser.add_argument("--ref", metavar="ref", type = str, nargs = 1,
+                    help = "Reference genome used with bxlra")
+parser.add_argument("--alns", metavar="alns", type = str, nargs = 1,
+                    help = "alignments.tsv from bxlra")
+parser.add_argument("--contigs", metavar="contigs", type = str, nargs = 1,
+                    help = "contigs.fa from bxlra")
+parser.add_argument("--vcf_template", metavar="vcf_template", type = str, nargs = 1,
+                    help = "VCF template for you reference genome")
+parser.add_argument("--vcf_out", metavar="vcf_out", type = str, nargs = 1,
+                    help = "VCF path for the output", default = "out.vcf")
+parser.add_argument("--out_contigs", metavar="out_contigs", type = str, nargs = 1,
+                    help = "Contains contigs from which variants were selected", default = "selected_contigs.fa")
+parser.add_argument("--min_insert", metavar="min_insert", type = int, nargs = 1,
+                    help = "Minimum insertion size to extract", default = 50)
 
 args = parser.parse_args()
 print("Sample", args.sample[0])
 print("Alignments", args.alns[0])
-print("Contigs", args.contigs[0])
+print("Input Contigs", args.contigs[0])
 print("Reference", args.ref[0])
 print("VCF template", args.vcf_template[0])
 print("Output path",  args.vcf_out[0])
+print("Output Selected Contigs", args.out_contigs[0])
 print("Minimum insertion size ", args.min_insert[0])
 
 records = extract_vcf_records(args.sample[0], args.alns[0], args.contigs[0], args.ref[0], args.vcf_template[0],
-                              args.vcf_out[0], args.min_insert[0])
+                              args.vcf_out[0], args.out_contigs[0], args.min_insert[0])
 
 print("Extracted", len(records), "insertions")
