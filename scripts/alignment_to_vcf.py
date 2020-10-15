@@ -111,7 +111,9 @@ def extract_vcf_records(sample_name,
                     writer.write_record(rec)
                     contig_hash = sha1("_{chrom}_{pos}_{alt}".format(
                         chrom = ref_chrom, pos = ref_start, alt = alt_allele[1:]).encode()).hexdigest()
-                    selected_contig_fasta.writelines([">" + query_name + contig_hash + "\n", query_seq + "\n"])
+                    print(query_name)
+                    selected_contig_fasta.writelines([">" + query_name + "_" + sample_name + "_" + contig_hash + "\n",
+                                                      query_seq + "\n"])
                 query_pos += op[0]
     selected_contig_fasta.close()
     return records

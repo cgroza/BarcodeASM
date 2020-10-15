@@ -16,7 +16,8 @@ reduced_fasta = open(args.out[0], "w")
 hashes = set()
 
 for seq_name in contig_fasta.references:
-    (chrom, start, end, ps, hp, var_hash) = seq_name.split("_")
+    print(seq_name)
+    (chrom, start, end, ps, hp, num, sample, var_hash) = seq_name.split("_")
     if var_hash not in hashes:
         # output unique variant
         contig_seq = contig_fasta.fetch(seq_name)
