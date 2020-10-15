@@ -4,6 +4,7 @@ import cigar
 import Bio.Seq
 import vcfpy
 import argparse
+from hashlib import sha1
 
 def extract_vcf_records(sample_name,
                         # input paths
@@ -108,7 +109,9 @@ def extract_vcf_records(sample_name,
                                     )
                     records.append(rec)
                     writer.write_record(rec)
-                    selected_contig_fasta.writelines([">" + query_name + "\n", query_seq + "\n"])
+                    contig_hash = sha1("_{chrom}_{pos}_{alt}".format(
+                        chrom = ref_chrom, pos = ref_start, alt = alt_allele).encode()).hexdigest()
+                    selected_contig_fasta.writelines([">" + query_name + contig_hash + "\n", query_seq + "\n"])
                 query_pos += op[0]
     selected_contig_fasta.close()
     return records
