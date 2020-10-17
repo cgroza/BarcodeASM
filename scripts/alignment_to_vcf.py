@@ -10,12 +10,16 @@ def extract_vcf_records(sample_name,
                         # input paths
                         alignments_path, contigs_path, ref_fasta_path, vcf_template_path,
                         # output paths
-                        vcf_out_path, selected_contigs_path, min_insert_size = 50):
+                        vcf_out_path, selected_contigs_path, flanked_contigs_path,
+                        flank_length, min_insert_size):
     records = []
 
     ref_fasta = pysam.FastaFile(ref_fasta_path)
     contig_fasta = pysam.FastaFile(contigs_path)
+
     selected_contig_fasta = open(selected_contigs_path, "w")
+    flanked_contig_fasta = open(flanked_contigs_path, "w")
+
     alns = pandas.read_csv(alignments_path, sep = " ")
 
     reader = vcfpy.Reader.from_path(vcf_template_path)
@@ -54,8 +58,6 @@ def extract_vcf_records(sample_name,
         if strand == "-":
             query_seq = str(Bio.Seq.Seq(query_seq).reverse_complement())
 
-        # print(strand)
-
         ref_seq =  ref_fasta.fetch(ref_chrom, ref_start, ref_end)
 
         query_pos = query_start
@@ -63,7 +65,6 @@ def extract_vcf_records(sample_name,
 
         # we are looking to extract insertions larger than 50bp
         for op in ops:
-            # print(op)
             # skip matches
             if op[1] == 'M':
                 query_pos += op[0]
@@ -77,11 +78,6 @@ def extract_vcf_records(sample_name,
             elif op[1] == 'I':
                 # only interested in large insertions
                 if op[0] > min_insert_size:
-                    # print(op[0], "insertion from", ops, "on strand", strand)
-                    # print(query_start, query_end)
-                    # print("query", query_seq)
-                    # print("ref", ref_seq)
-                    # print("var", query_seq[query_pos:query_pos + op[0]])
                     # Generate pysam.VariantRecord
 
                     # need to check conversion from 0-based coordinates to 1-based
@@ -96,7 +92,8 @@ def extract_vcf_records(sample_name,
                     else:
                         gt = "0/1"
 
-                    rec = vcfpy.Record(CHROM = ref_chrom, POS = ref_start + target_pos + 1, ID = [query_name],
+                    break_point = ref_start + target_pos
+                    rec = vcfpy.Record(CHROM = ref_chrom, POS = break_point + 1, ID = [query_name],
                                     REF = ref_allele, ALT = [vcfpy.Substitution("INS", alt_allele)],
                                     QUAL = 999, FILTER = ["PASS"], INFO = {}, FORMAT =
                                        ["GT", "SVLEN", "PS", "HP", "CIGAR", "STRAND", "CONTIG_START"],
@@ -108,12 +105,19 @@ def extract_vcf_records(sample_name,
                                                                             CONTIG_START = str(query_start)))]
                                     )
                     records.append(rec)
+
                     writer.write_record(rec)
                     contig_hash = sha1("_{chrom}_{pos}_{alt}".format(
                         chrom = ref_chrom, pos = ref_start, alt = alt_allele[1:]).encode()).hexdigest()
-                    print(query_name)
                     selected_contig_fasta.writelines([">" + query_name + "_" + sample_name + "_" + contig_hash + "\n",
                                                       query_seq + "\n"])
+
+                    # note, the interval is [start, end[
+                    left_flank = ref_fasta.fetch(ref_chrom, break_point - flank_length, break_point)
+                    right_flank = ref_fasta.fetch(ref_chrom, break_point, break_point + flank_length)
+                    flanked_contig_fasta.writelines([">" + query_name + "_" + sample_name + "_" + contig_hash + "\n",
+                                                     left_flank + alt_allele[1:] + right_flank + "\n"])
+
                 query_pos += op[0]
     selected_contig_fasta.close()
     return records
@@ -133,20 +137,28 @@ parser.add_argument("--vcf_out", metavar="vcf_out", type = str, nargs = 1,
                     help = "VCF path for the output", default = "out.vcf")
 parser.add_argument("--out_contigs", metavar="out_contigs", type = str, nargs = 1,
                     help = "Contains contigs from which variants were selected", default = "selected_contigs.fa")
+parser.add_argument("--flanked_inserts", metavar="flanked_inserts", type = str, nargs = 1,
+                    help = "Contains insertions large flanks added", default = "flanked_contigs.fa")
+parser.add_argument("--flank_length", metavar="flank_length", type = int, nargs = 1,
+                    help = "Specify the length of flanks", default = 10000)
 parser.add_argument("--min_insert", metavar="min_insert", type = int, nargs = 1,
                     help = "Minimum insertion size to extract", default = 50)
 
 args = parser.parse_args()
+
 print("Sample", args.sample[0])
 print("Alignments", args.alns[0])
 print("Input Contigs", args.contigs[0])
 print("Reference", args.ref[0])
 print("VCF template", args.vcf_template[0])
-print("Output path",  args.vcf_out[0])
-print("Output Selected Contigs", args.out_contigs[0])
+print("VCF Output path",  args.vcf_out[0])
+print("Selected contigs fasta output path", args.out_contigs[0])
+print("Flanked inserts fasta output path", args.flanked_inserts[0])
+print("Flank length", args.flank_length)
 print("Minimum insertion size ", args.min_insert[0])
 
-records = extract_vcf_records(args.sample[0], args.alns[0], args.contigs[0], args.ref[0], args.vcf_template[0],
-                              args.vcf_out[0], args.out_contigs[0], args.min_insert[0])
+records = extract_vcf_records(args.sample[0], args.alns[0], args.contigs[0], args.ref[0], args.vcf_template[0],  # inputs
+                              args.vcf_out[0], args.out_contigs[0], args.flanked_inserts[0],  # outputs
+                              args.flank_length, args.min_insert[0])  # parameters
 
 print("Extracted", len(records), "insertions")
