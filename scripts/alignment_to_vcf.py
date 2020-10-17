@@ -12,7 +12,6 @@ def extract_vcf_records(sample_name,
                         # output paths
                         vcf_out_path, selected_contigs_path, flanked_contigs_path,
                         flank_length, min_insert_size):
-    records = []
 
     ref_fasta = pysam.FastaFile(ref_fasta_path)
     contig_fasta = pysam.FastaFile(contigs_path)
@@ -104,7 +103,6 @@ def extract_vcf_records(sample_name,
                                                                             CIGAR = str(cig), STRAND = strand,
                                                                             CONTIG_START = str(query_start)))]
                                     )
-                    records.append(rec)
 
                     writer.write_record(rec)
                     contig_hash = sha1("_{chrom}_{pos}_{alt}".format(
@@ -120,7 +118,6 @@ def extract_vcf_records(sample_name,
 
                 query_pos += op[0]
     selected_contig_fasta.close()
-    return records
 
 parser = argparse.ArgumentParser("Extract a VCF file from bxlra contig local alignments.")
 parser.add_argument("--sample", metavar="sample", type = str, nargs = 1,
