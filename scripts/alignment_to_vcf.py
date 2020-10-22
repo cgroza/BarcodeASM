@@ -13,6 +13,7 @@ def extract_vcf_records(sample_name,
                         vcf_out_path, selected_contigs_path, flanked_contigs_path,
                         flank_length, min_insert_size):
 
+    n_records = 0
     ref_fasta = pysam.FastaFile(ref_fasta_path)
     contig_fasta = pysam.FastaFile(contigs_path)
 
@@ -26,6 +27,7 @@ def extract_vcf_records(sample_name,
 
     writer = vcfpy.Writer.from_path(vcf_out_path, reader.header)
 
+    # parse each alignment and look for insertions above min_insert_size
     for r in alns.iterrows():
         query_name = r[1]["QName"]
 
@@ -53,12 +55,14 @@ def extract_vcf_records(sample_name,
         cig = cigar.Cigar(r[1]["CIGAR"])
         ops = list(cig.items())
 
+        # convert sequences to the positive strand
         query_seq = contig_fasta.fetch(query_name)
         if strand == "-":
             query_seq = str(Bio.Seq.Seq(query_seq).reverse_complement())
 
         ref_seq =  ref_fasta.fetch(ref_chrom, ref_start, ref_end)
 
+        # initialize iterators for the cigar string
         query_pos = query_start
         target_pos = target_start
 
@@ -92,6 +96,7 @@ def extract_vcf_records(sample_name,
                         gt = "0/1"
 
                     break_point = ref_start + target_pos
+                    # output VCF record corresponding to the insertion
                     rec = vcfpy.Record(CHROM = ref_chrom, POS = break_point + 1, ID = [query_name],
                                     REF = ref_allele, ALT = [vcfpy.Substitution("INS", alt_allele)],
                                     QUAL = 999, FILTER = ["PASS"], INFO = {}, FORMAT =
@@ -104,20 +109,25 @@ def extract_vcf_records(sample_name,
                                                                             CONTIG_START = str(query_start)))]
                                     )
 
+                    # output contig that contains this insertion
                     writer.write_record(rec)
                     contig_hash = sha1("_{chrom}_{pos}_{alt}".format(
                         chrom = ref_chrom, pos = ref_start, alt = alt_allele[1:]).encode()).hexdigest()
-                    selected_contig_fasta.writelines([">" + query_name + "_" + sample_name + "_" + contig_hash + "\n",
+                    contig_name = ">" + query_name + "_" + sample_name + "_" + contig_hash + "_" + str(op[0])
+                    selected_contig_fasta.writelines([contig_name + "\n",
                                                       query_seq + "\n"])
 
+                    # output same contig, but with large flanking sequences
                     # note, the interval is [start, end[
                     left_flank = ref_fasta.fetch(ref_chrom, break_point - flank_length, break_point)
                     right_flank = ref_fasta.fetch(ref_chrom, break_point, break_point + flank_length)
-                    flanked_contig_fasta.writelines([">" + query_name + "_" + sample_name + "_" + contig_hash + "\n",
+                    flanked_contig_fasta.writelines([contig_name + "\n",
                                                      left_flank + alt_allele[1:] + right_flank + "\n"])
+                    n_records += 1
 
                 query_pos += op[0]
     selected_contig_fasta.close()
+    return n_records
 
 parser = argparse.ArgumentParser("Extract a VCF file from bxlra contig local alignments.")
 parser.add_argument("--sample", metavar="sample", type = str, nargs = 1,
@@ -156,6 +166,6 @@ print("Minimum insertion size ", args.min_insert[0])
 
 records = extract_vcf_records(args.sample[0], args.alns[0], args.contigs[0], args.ref[0], args.vcf_template[0],  # inputs
                               args.vcf_out[0], args.out_contigs[0], args.flanked_inserts[0],  # outputs
-                              args.flank_length, args.min_insert[0])  # parameters
+                              args.flank_length[0], args.min_insert[0])  # parameters
 
-print("Extracted", len(records), "insertions")
+print("Extracted", records, "insertions")

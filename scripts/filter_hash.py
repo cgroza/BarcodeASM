@@ -17,7 +17,7 @@ hashes = set()
 
 for seq_name in contig_fasta.references:
     print(seq_name)
-    (chrom, start, end, ps, hp, num, sample, var_hash) = seq_name.split("_")
+    (chrom, start, end, ps, hp, num, sample, var_hash, sv_len) = seq_name.split("_")
     if var_hash not in hashes:
         # output unique variant
         contig_seq = contig_fasta.fetch(seq_name)
