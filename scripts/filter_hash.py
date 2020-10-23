@@ -8,11 +8,18 @@ parser.add_argument("--fasta", metavar="fasta", type = str, nargs = 1,
                     help = "Contig fasta file to be reduced")
 parser.add_argument("--out", metavar="out", type = str, nargs = 1,
                     help = "Output path for reduced contig fasta file")
+parser.add_argument("--blacklist", metavar="blacklist", default = "", type = str, nargs = 1,
+                    help = "List of regions to exclude")
 
 args = parser.parse_args()
 
 contig_fasta = pysam.FastaFile(args.fasta[0])
 reduced_fasta = open(args.out[0], "w")
+
+blacklist = set()
+if len(args.blacklist) > 0:
+    with open(args.blacklist[0]) as blacklist_f:
+        blacklist.update(blacklist_f.read().splitlines())
 
 hashes = set()
 
@@ -34,6 +41,12 @@ def cmp_contig(x, y):
 for seq_name in sorted(contig_fasta.references, key=functools.cmp_to_key(cmp_contig)):
     print(seq_name)
     (chrom, start, end, ps, hp, num, sample, var_hash, sv_len) = seq_name.split("_")
+
+    # skip if in blacklist
+    if "_".join([chrom, start, end]) in blacklist:
+        print("Excluded by blacklist")
+        continue
+
     if var_hash not in hashes:
         # output unique variant
         contig_seq = contig_fasta.fetch(seq_name)
