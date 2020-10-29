@@ -119,8 +119,12 @@ def extract_vcf_records(sample_name,
 
                     # output same contig, but with large flanking sequences
                     # note, the interval is [start, end[
-                    left_flank = ref_fasta.fetch(ref_chrom, break_point - flank_length, break_point)
-                    right_flank = ref_fasta.fetch(ref_chrom, break_point, break_point + flank_length)
+                    if flank_length > 0:
+                        left_flank = ref_fasta.fetch(ref_chrom, break_point - flank_length, break_point)
+                        right_flank = ref_fasta.fetch(ref_chrom, break_point, break_point + flank_length)
+                    else:
+                        left_flank = ""
+                        right_flank = ""
                     flanked_contig_fasta.writelines([contig_name + "\n",
                                                      left_flank + alt_allele[1:] + right_flank + "\n"])
                     n_records += 1
