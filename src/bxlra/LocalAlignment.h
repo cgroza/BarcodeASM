@@ -18,46 +18,48 @@ struct LocalAlignmentParams {
   int max_join_long = 20000;
   int max_join_short = 2000;
   int min_join_flank_sc = 1000;
-  float min_join_flank_ratio = 0.5f;
+  float min_join_flank_ratio = 0.3f;
+  int max_gap = 10000;
+  int bw = 500;
 };
 
 class LocalAlignment {
 public:
-    LocalAlignment(std::string chr, size_t start, size_t end,
-                   const SeqLib::RefGenome &genome);
-    LocalAlignment(std::string target_sequence, std::string target_name);
+  LocalAlignment(std::string chr, size_t start, size_t end,
+                 const SeqLib::RefGenome &genome);
+  LocalAlignment(std::string target_sequence, std::string target_name);
 
-    ~LocalAlignment();
-    void align(const SeqLib::UnalignedSequenceVector &seqs);
-    size_t writeAlignments(std::ostream &out);
+  ~LocalAlignment();
+  void align(const SeqLib::UnalignedSequenceVector &seqs);
+  size_t writeAlignments(std::ostream &out);
 
-    // default minimap2 parameters
-    const int MINIMIZER_K = 15;
-    const int MINIMIZER_W = 10;
-    const int BUCKET_BITS = 64;
-    const int IS_HPC = 0;
+  // default minimap2 parameters
+  const int MINIMIZER_K = 15;
+  const int MINIMIZER_W = 10;
+  const int BUCKET_BITS = 64;
+  const int IS_HPC = 0;
 
-    static std::string getAlignmentHeader(){
-        return "TName TLength TStart TEnd QName QLength QStart QEnd Hit Strand CIGAR";
-    }
+  static std::string getAlignmentHeader() {
+    return "TName TLength TStart TEnd QName QLength QStart QEnd Hit Strand "
+           "CIGAR";
+  }
 
-  private:
-    void setupIndex(std::string target_sequence);
+private:
+  void setupIndex(std::string target_sequence);
 
-    mm_idx_t* m_minimap_index;
-    mm_idxopt_t m_index_opt;
-    mm_mapopt_t m_map_opt;
+  mm_idx_t *m_minimap_index;
+  mm_idxopt_t m_index_opt;
+  mm_mapopt_t m_map_opt;
 
-    char *m_local_sequence;
+  char *m_local_sequence;
 
-    std::string m_target_name;
+  std::string m_target_name;
 
-    std::unordered_map<SeqLib::UnalignedSequence,
-                       MinimapAlignment,
-                       UnalignedSequenceHash,
-                       UnalignedSequenceEqualsTo> m_alignments;
+  std::unordered_map<SeqLib::UnalignedSequence, MinimapAlignment,
+                     UnalignedSequenceHash, UnalignedSequenceEqualsTo>
+      m_alignments;
 
-    LocalAlignmentParams m_params;
+  LocalAlignmentParams m_params;
 };
 
 #endif
