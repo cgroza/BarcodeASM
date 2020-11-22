@@ -22,6 +22,7 @@ void LocalAlignment::setupIndex(std::string target_sequence) {
 
   mm_set_opt(0, &m_index_opt, &m_map_opt);
   m_map_opt.flag |= MM_F_CIGAR; // perform base level alignment
+
   // tune minimap for large gaps
   m_map_opt.max_join_short = m_params.max_join_short;
   m_map_opt.max_join_long = m_params.max_join_long;
@@ -46,7 +47,8 @@ void LocalAlignment::setupIndex(std::string target_sequence) {
   m_map_opt.a = m_params.a;
   m_map_opt.b = m_params.b;
 
-  std::cerr 
+#ifdef DEBUG_LOCAL_ALN
+  std::cerr
 	  << m_params.max_join_short << std::endl
 	  << m_params.max_join_long << std::endl
 	  << m_params.min_join_flank_sc << std::endl
@@ -69,7 +71,7 @@ void LocalAlignment::setupIndex(std::string target_sequence) {
 	  << m_params.max_gap_ref << std::endl
 	  << m_params.a << std::endl
 	  << m_params.b << std::endl;
-
+#endif
   m_minimap_index = mm_idx_str(MINIMIZER_W, MINIMIZER_W, IS_HPC, BUCKET_BITS, 1,
                                (const char **)&m_local_sequence, NULL);
   // update the mapping options
