@@ -41,10 +41,10 @@
 #define HAVE_SYS_TYPES_H 1
 
 /* Define to 1 if you have the <tr1/unordered_map> header file. */
-/* #undef HAVE_TR1_UNORDERED_MAP */
+#define HAVE_TR1_UNORDERED_MAP 1
 
 /* Define to 1 if you have the <tr1/unordered_set> header file. */
-/* #undef HAVE_TR1_UNORDERED_SET */
+#define HAVE_TR1_UNORDERED_SET 1
 
 /* Define to 1 if you have the <unistd.h> header file. */
 #define HAVE_UNISTD_H 1
@@ -81,7 +81,3 @@
 
 /* Version number of package */
 #define VERSION "1.0"
-
-/* #define DEBUG_BX_BAM_WALKER */
-
-/* #define DEBUG_READ_ALIGNMENT */

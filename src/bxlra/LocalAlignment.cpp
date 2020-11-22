@@ -29,6 +29,46 @@ void LocalAlignment::setupIndex(std::string target_sequence) {
   m_map_opt.min_join_flank_ratio = m_params.min_join_flank_ratio;
   m_map_opt.max_gap = m_params.max_gap;
   m_map_opt.bw = m_params.bw;
+  m_map_opt.pri_ratio = m_params.pri_ratio;
+  m_map_opt.max_chain_skip = m_params.max_chain_skip;
+  m_map_opt.end_bonus = m_params.end_bonus;
+  m_map_opt.chain_gap_scale = m_params.chain_gap_scale;
+  m_map_opt.min_chain_score = m_params.min_chain_score;
+  m_map_opt.e = m_params.e;
+  m_map_opt.e2 = m_params.e2;
+  m_map_opt.q = m_params.q;
+  m_map_opt.q2 = m_params.q2;
+  m_map_opt.max_chain_iter = m_params.max_chain_iter;
+  m_map_opt.max_clip_ratio = m_params.max_clip_ratio;
+  m_map_opt.zdrop = m_params.zdrop;
+  m_map_opt.zdrop_inv = m_params.zdrop_inv;
+  m_map_opt.max_gap_ref = m_params.max_gap_ref;
+  m_map_opt.a = m_params.a;
+  m_map_opt.b = m_params.b;
+
+  std::cerr 
+	  << m_params.max_join_short << std::endl
+	  << m_params.max_join_long << std::endl
+	  << m_params.min_join_flank_sc << std::endl
+	  << m_params.min_join_flank_ratio << std::endl
+	  << m_params.max_gap << std::endl
+	  << m_params.bw << std::endl
+	  << m_params.pri_ratio << std::endl
+	  << m_params.max_chain_skip << std::endl
+	  << m_params.end_bonus << std::endl
+	  << m_params.chain_gap_scale << std::endl
+	  << m_params.min_chain_score << std::endl
+	  << m_params.e << std::endl
+	  << m_params.e2 << std::endl
+	  << m_params.q << std::endl
+	  << m_params.q2 << std::endl
+	  << m_params.max_chain_iter << std::endl
+	  << m_params.max_clip_ratio << std::endl
+	  << m_params.zdrop << std::endl
+	  << m_params.zdrop_inv << std::endl
+	  << m_params.max_gap_ref << std::endl
+	  << m_params.a << std::endl
+	  << m_params.b << std::endl;
 
   m_minimap_index = mm_idx_str(MINIMIZER_W, MINIMIZER_W, IS_HPC, BUCKET_BITS, 1,
                                (const char **)&m_local_sequence, NULL);
