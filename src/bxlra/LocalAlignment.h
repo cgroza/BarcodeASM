@@ -34,6 +34,11 @@ struct LocalAlignmentParams {
   int zdrop_inv = 1000;
   int max_gap_ref = -1; 
   int a = 2;  int b = 4;
+  // minimizer parameters
+  int minimizer_w = 10;
+  int minimizer_k = 15;
+  int bucket_bits = 64;
+  int is_hpc = 1;
 };
 
 class LocalAlignment {
@@ -47,10 +52,6 @@ public:
   size_t writeAlignments(std::ostream &out);
 
   // default minimap2 parameters
-  const int MINIMIZER_K = 15;
-  const int MINIMIZER_W = 10;
-  const int BUCKET_BITS = 64;
-  const int IS_HPC = 1;
 
   static std::string getAlignmentHeader() {
     return "TName TLength TStart TEnd QName QLength QStart QEnd Hit Strand "
