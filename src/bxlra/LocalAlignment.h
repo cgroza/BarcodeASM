@@ -25,14 +25,14 @@ struct LocalAlignmentParams {
   int max_chain_skip = 25;
   int end_bonus = 10;
   float chain_gap_scale = 1.0f;
-  int min_chain_score = 0;
+  int min_chain_score = 20;
   int e = 10;  int e2 = 0;
   int q = 4;  int q2 = 300;
   int max_chain_iter = 5000;
   float max_clip_ratio = 1.0f;
   int zdrop = 10000;
   int zdrop_inv = 1000;
-  int max_gap_ref = -1; 
+  int max_gap_ref = -1;
   int a = 2;  int b = 4;
   // minimizer parameters
   int minimizer_w = 10;
