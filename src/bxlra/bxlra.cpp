@@ -30,6 +30,7 @@ size_t min_overlap = 90;
 size_t num_threads = 1;
 bool weird_reads_only = true;
 bool aggressive_bubble_pop = false;
+bool simplify = false;
 bool split_reads_by_phase = false;
 bool write_gfa = false;
 std::string detect_seqs_fa;
@@ -38,7 +39,7 @@ std::string detect_seqs_fa;
 int main(int argc, char **argv) {
   opterr = 0;
   int c;
-  while ((c = getopt(argc, argv, "GSPat:b:B:r:g:o:F:")) != -1)
+  while ((c = getopt(argc, argv, "GSsPat:b:B:r:g:o:F:")) != -1)
     switch (c) {
     case 't':
         try {
@@ -57,6 +58,9 @@ int main(int argc, char **argv) {
       break;
     case 'r':
       opt::regions_path = optarg;
+      break;
+    case 's':
+      opt::simplify = true;
       break;
     case 'S':
       opt::split_reads_by_phase = true;
@@ -86,6 +90,7 @@ int main(int argc, char **argv) {
   AssemblyParams params;
   params.min_overlap = opt::min_overlap;
   params.aggressive_bubble_pop = opt::aggressive_bubble_pop;
+  params.simplify = opt::simplify;
   params.split_reads_by_phase = opt::split_reads_by_phase;
   params.write_gfa = opt::write_gfa;
 

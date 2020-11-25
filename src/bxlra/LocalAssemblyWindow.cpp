@@ -93,8 +93,12 @@ size_t LocalAssemblyWindow::assemblePhase(BamReadVector &phased_reads, std::stri
 
   fermi.SetMinOverlap(m_params.min_overlap);
   fermi.AddReads(phased_reads);
+  // heterozygous bubble popping
   if (m_params.aggressive_bubble_pop)
-    fermi.SetAggressiveTrim();
+      fermi.SetAggressiveTrim();
+  // graph simplification routines
+  if (m_params.simplify)
+      fermi.SetSimplifyBubble();
   // fermi.CorrectAndFilterReads();
   fermi.PerformAssembly();
 
