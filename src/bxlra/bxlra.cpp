@@ -101,6 +101,7 @@ int main(int argc, char **argv) {
             << "Params P: " << params.aggressive_bubble_pop << std::endl
             << "Params a: " << !opt::weird_reads_only << std::endl
             << "Params S: " << opt::split_reads_by_phase << std::endl
+            << "Params s: " << opt::simplify << std::endl
             << "Params G: " << opt::write_gfa << std::endl
             << "Params F: " << opt::detect_seqs_fa << std::endl;
 
