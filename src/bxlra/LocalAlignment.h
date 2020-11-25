@@ -17,13 +17,13 @@
 struct LocalAlignmentParams {
   int max_join_long = 20000;
   int max_join_short = 10000;
-  int min_join_flank_sc = 0;
-  float min_join_flank_ratio = 0.0f;
+  int min_join_flank_sc = 10;
+  float min_join_flank_ratio = 0.1f;
   int max_gap = 10000;
   int bw = 2000;
   float pri_ratio = 0.8f;
   int max_chain_skip = 25;
-  int end_bonus = 400;
+  int end_bonus = 10;
   float chain_gap_scale = 1.0f;
   int min_chain_score = 0;
   int e = 10;  int e2 = 0;
