@@ -30,20 +30,19 @@ class BxBamWalker : public SeqLib::BamReader {
     /* bx_bam_path: BAM file indexed by bx tag. */
     BxBamWalker();
     BxBamWalker(const std::string &bx_bam_path,
-                     const std::string _prefix = "0000",
-                     bool _weird_reads_only = true);
+                const std::string _prefix = "0000",
+                bool _weird_reads_only = true, int _poor_alignment_max_mapq = 10);
 
     /*  */
     BamReadVector fetchReadsByBxBarcode(const BxBarcode &bx_barcode);
     BamReadVector fetchReadsByBxBarcode(const std::vector<BxBarcode> &bx_barcodes);
     std::string prefix;
 
-    static bool isBxReadWeird(SeqLib::BamRecord &r);
-    static const int POOR_ALIGNMENT_MAX_MAPQ = 10;
+    bool isBxReadWeird(SeqLib::BamRecord &r);
 
     private:
     bool weird_reads_only;
-
+    int POOR_ALIGNMENT_MAX_MAPQ = 10;
 };
 
 #endif

@@ -2,11 +2,13 @@
 
 BxBamWalker::BxBamWalker(const std::string &bx_bam_path,
                          const std::string _prefix,
-                         bool _weird_reads_only)
-    : prefix(_prefix), weird_reads_only(_weird_reads_only) {
-
-    BamReader();
-    Open(bx_bam_path);
+                         bool _weird_reads_only,
+                         int _poor_alignment_max_mapq )
+    : prefix(_prefix), weird_reads_only(_weird_reads_only),
+      POOR_ALIGNMENT_MAX_MAPQ(_poor_alignment_max_mapq)
+{
+  BamReader();
+  Open(bx_bam_path);
 }
 
 BxBamWalker::BxBamWalker() : weird_reads_only(true) { BamReader(); }

@@ -34,6 +34,7 @@ bool simplify = false;
 bool split_reads_by_phase = false;
 bool write_gfa = false;
 std::string detect_seqs_fa;
+int poor_alignment_max_mapq;
 } // namespace opt
 
 int main(int argc, char **argv) {
@@ -50,6 +51,9 @@ int main(int argc, char **argv) {
             return -1;
         }
         break;
+    case 'q':
+        opt::poor_alignment_max_mapq = std::stoi(optarg);
+      break;
     case 'b':
       opt::bam_path = optarg;
       break;
@@ -102,6 +106,7 @@ int main(int argc, char **argv) {
             << "Params a: " << !opt::weird_reads_only << std::endl
             << "Params S: " << opt::split_reads_by_phase << std::endl
             << "Params s: " << opt::simplify << std::endl
+            << "Params q: " << opt::poor_alignment_max_mapq << std::endl
             << "Params G: " << opt::write_gfa << std::endl
             << "Params F: " << opt::detect_seqs_fa << std::endl;
 
@@ -134,7 +139,7 @@ int main(int argc, char **argv) {
     bam_readers[i] = bam_reader;
 
     // and one BX_BamReader for each thread
-    BxBamWalker *bx_bam_walker = new BxBamWalker(opt::bx_bam_path, "0000", opt::weird_reads_only);
+    BxBamWalker *bx_bam_walker = new BxBamWalker(opt::bx_bam_path, "0000", opt::weird_reads_only, opt::poor_alignment_max_mapq);
     bx_bam_walkers[i] = bx_bam_walker;
   }
 
