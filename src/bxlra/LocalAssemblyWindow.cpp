@@ -1,5 +1,6 @@
 #include "LocalAssemblyWindow.h"
 #include "BxBamWalker.h"
+#include "fermi-lite/fml.h"
 
 LocalAssemblyWindow::LocalAssemblyWindow(SeqLib::GenomicRegion region,
                                          SeqLib::BamReader bam,
@@ -7,8 +8,12 @@ LocalAssemblyWindow::LocalAssemblyWindow(SeqLib::GenomicRegion region,
                                          AssemblyParams params)
     : m_params(params), m_region(region), m_bam(bam), m_bx_bam(bx_bam) {
 
+  // initialize assembly parameters
+  fml_opt_init(&m_fml_opt);
+
   std::stringstream prefix_ss;
-  prefix_ss << region.ChrName(bam.Header()) << "_" << region.pos1 << "_" << region.pos2;
+  prefix_ss << region.ChrName(bam.Header()) << "_" << region.pos1 << "_"
+            << region.pos2;
   m_prefix = prefix_ss.str();
 
 }
@@ -89,7 +94,7 @@ size_t LocalAssemblyWindow::assembleReads() {
 }
 
 size_t LocalAssemblyWindow::assemblePhase(BamReadVector &phased_reads, std::string phase, int phase_set) {
-  SeqLib::FermiAssembler fermi;
+  SeqLib::FermiAssembler fermi(m_fml_opt);
 
   fermi.SetMinOverlap(m_params.min_overlap);
   fermi.AddReads(phased_reads);

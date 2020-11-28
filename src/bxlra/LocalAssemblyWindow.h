@@ -57,11 +57,12 @@ public:
     BamReadVector m_reads;
     std::string m_prefix;
     SeqLib::UnalignedSequenceVector m_contigs;
-
     // keep track of barcode frequency and their phase set
     BxBarcodeCounts m_barcode_count;
     BxBarcodePS m_barcode_phase;
     BxBarcodeHap m_barcode_hap;
+    // assembly parameters
+    fml_opt_t m_fml_opt;
 };
 
 #endif
