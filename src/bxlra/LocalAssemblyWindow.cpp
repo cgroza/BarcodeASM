@@ -1,6 +1,4 @@
 #include "LocalAssemblyWindow.h"
-#include "BxBamWalker.h"
-#include "fermi-lite/fml.h"
 
 LocalAssemblyWindow::LocalAssemblyWindow(SeqLib::GenomicRegion region,
                                          SeqLib::BamReader bam,
@@ -10,6 +8,7 @@ LocalAssemblyWindow::LocalAssemblyWindow(SeqLib::GenomicRegion region,
 
   // initialize assembly parameters
   fml_opt_init(&m_fml_opt);
+  m_fml_opt.mag_opt.min_elen = m_params.min_elen;
 
   std::stringstream prefix_ss;
   prefix_ss << region.ChrName(bam.Header()) << "_" << region.pos1 << "_"

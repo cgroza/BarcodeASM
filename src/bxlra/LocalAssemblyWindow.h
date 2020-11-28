@@ -8,14 +8,15 @@
 #include "SeqLib/GenomicRegion.h"
 #include "SeqLib/SeqLibUtils.h"
 #include "SeqLib/UnalignedSequence.h"
+#include "fermi-lite/fml.h"
 #include <algorithm>
 #include <fstream>
 #include <iterator>
 #include <ostream>
 #include <sstream>
 #include <string>
-#include <vector>
 #include <unordered_set>
+#include <vector>
 
 struct AssemblyParams {
     size_t min_overlap = 90;
@@ -24,6 +25,7 @@ struct AssemblyParams {
     bool split_reads_by_phase = false;
     bool simplify;
     bool write_gfa = false;
+    int min_elen = 300;
 };
 
 typedef std::unordered_map<BxBarcode, int> BxBarcodeCounts;
