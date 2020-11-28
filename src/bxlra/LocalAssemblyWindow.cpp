@@ -96,6 +96,9 @@ size_t LocalAssemblyWindow::assembleReads() {
 size_t LocalAssemblyWindow::assemblePhase(BamReadVector &phased_reads, std::string phase, int phase_set) {
   SeqLib::FermiAssembler fermi(m_fml_opt);
 
+  // don't attempt empty assembly
+  if(phased_reads.size() < 2)
+	  return 0;
   fermi.SetMinOverlap(m_params.min_overlap);
   fermi.AddReads(phased_reads);
   // heterozygous bubble popping

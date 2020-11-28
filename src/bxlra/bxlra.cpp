@@ -40,7 +40,7 @@ int poor_alignment_max_mapq = 10;
 int main(int argc, char **argv) {
   opterr = 0;
   int c;
-  while ((c = getopt(argc, argv, "GSsPat:b:B:r:g:o:F:")) != -1)
+  while ((c = getopt(argc, argv, "q:GSsPat:b:B:r:g:o:F:")) != -1)
     switch (c) {
     case 't':
         try {

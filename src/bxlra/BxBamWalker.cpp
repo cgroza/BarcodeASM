@@ -9,6 +9,7 @@ BxBamWalker::BxBamWalker(const std::string &bx_bam_path,
 {
   BamReader();
   Open(bx_bam_path);
+  std::cerr << "Poor alignment max MAPQ: " << POOR_ALIGNMENT_MAX_MAPQ << std::endl;
 }
 
 BxBamWalker::BxBamWalker() : weird_reads_only(true) { BamReader(); }
@@ -70,8 +71,7 @@ bool BxBamWalker::isBxReadWeird(SeqLib::BamRecord &r) {
     // the aligner Includes information on insert size, mate read orientation
     // etc...
     bool isWeird = !r.PairMappedFlag() || !r.MappedFlag() ||
-        (r.MapQuality() <= POOR_ALIGNMENT_MAX_MAPQ); // ||
-    // !r.ProperPair();
+        (r.MapQuality() <= POOR_ALIGNMENT_MAX_MAPQ);// || !r.ProperPair();
 
     // report which flag was set
 #ifdef DEBUG_BX_BAM_WALKER
