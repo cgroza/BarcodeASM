@@ -27,8 +27,15 @@ def extract_vcf_records(sample_name,
 
     writer = vcfpy.Writer.from_path(vcf_out_path, reader.header)
 
+    contig_loci = set()
+
     # parse each alignment and look for insertions above min_insert_size
     for r in alns.iterrows():
+        # skip secondary alignments
+        hit =  r[1]["Hit"]
+        if hit != "0":
+            continue
+
         query_name = r[1]["QName"]
 
         # local alignment window in the reference
@@ -109,15 +116,23 @@ def extract_vcf_records(sample_name,
                                                                             CONTIG_START = str(query_start)))]
                                     )
 
+                    n_records += 1
                     # output contig that contains this insertion
                     writer.write_record(rec)
+
+                    contig_locus = ">" + query_name + "_" + sample_name
                     contig_hash = sha1("_{chrom}_{pos}_{alt}".format(
                         chrom = ref_chrom, pos = ref_start, alt = alt_allele[1:]).encode()).hexdigest()
-                    contig_name = ">" + query_name + "_" + sample_name + "_" + contig_hash + "_" + str(op[0])
-                    selected_contig_fasta.writelines([contig_name + "\n",
-                                                      query_seq + "\n"])
 
-                    # output same contig, but with large flanking sequences
+                    contig_name = contig_locus + "_" + contig_hash + "_" + str(op[0])
+
+                    if contig_locus not in contig_loci:
+                        selected_contig_fasta.writelines([contig_name + "\n",
+                                                      query_seq + "\n"])
+                        contig_loci.add(contig_locus)
+
+
+                    # output same insertion, but with flanking sequences
                     # note, the interval is [start, end[
                     if flank_length > 0:
                         left_flank = ref_fasta.fetch(ref_chrom, break_point - flank_length, break_point)
@@ -127,7 +142,6 @@ def extract_vcf_records(sample_name,
                         right_flank = ""
                     flanked_contig_fasta.writelines([contig_name + "\n",
                                                      left_flank + alt_allele[1:] + right_flank + "\n"])
-                    n_records += 1
 
                 query_pos += op[0]
     selected_contig_fasta.close()
