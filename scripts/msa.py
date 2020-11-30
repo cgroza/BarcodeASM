@@ -65,19 +65,22 @@ def run_loci(contig_fasta_path, out_msa, muscle_exe, input_queue, output_queue):
         print("Done", mp.current_process().name)
         return True
 
-def write_results(results_queue, output_path):
+def write_results(results_queue, output_path, n_results):
     # output consensus sequences
     print("Writing to", output_path)
     out_f = open(output_path, "w")
-    try:
-        while True:
+    n = 0
+    while n < n_results:
+        try:
             cons_contig = results_queue.get_nowait()
             out_f.writelines([">" + cons_contig[0] + "\n", cons_contig[1] + "\n"])
             results_queue.task_done()
-    except queue.Empty:
-        out_f.close()
-        print("Wrote to", output_path)
-        return True
+            n += 1
+        except queue.Empty:
+            pass
+    out_f.close()
+    print("Wrote to", output_path)
+    return True
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser("Build consensus sequence from assembled contigs.")
@@ -126,13 +129,15 @@ if __name__ == '__main__':
     # wait for all the tasks to finish feeding to child processes
     # note: this does not mean that the child processes finished
     print("Waiting for threads to finish...")
-    input_queue.join()
-    print("Input queue empty")
+    # input_queue.join()
+    # print("Input queue empty")
 
     # output results in a separate process that counts tasks until the output queue is empty for good
-    out_p = mp.Process(target = write_results, args = (output_queue, args.out_cons[0]))
+    out_p = mp.Process(target = write_results, args = (output_queue, args.out_cons[0], n_loci))
     out_p.start()
     # wait for all the tasks to be finished by the child processes
+    input_queue.join()
+    print("Input queue empty. Threads finished.")
     output_queue.join()
     print("Output queue empty")
     print("Finished")
