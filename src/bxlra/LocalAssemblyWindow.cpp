@@ -9,6 +9,10 @@ LocalAssemblyWindow::LocalAssemblyWindow(SeqLib::GenomicRegion region,
   // initialize assembly parameters
   fml_opt_init(&m_fml_opt);
   m_fml_opt.mag_opt.min_elen = m_params.min_elen;
+  m_fml_opt.min_cnt = m_params.min_cnt;
+  m_fml_opt.max_cnt = m_params.max_cnt;
+  m_fml_opt.min_asm_ovlp = m_params.min_asm_ovlp;
+  m_fml_opt.ec_k = m_params.ec_k;
 
   std::stringstream prefix_ss;
   prefix_ss << region.ChrName(bam.Header()) << "_" << region.pos1 << "_"
