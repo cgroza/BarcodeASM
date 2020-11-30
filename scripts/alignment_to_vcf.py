@@ -33,7 +33,7 @@ def extract_vcf_records(sample_name,
     for r in alns.iterrows():
         # skip secondary alignments
         hit =  r[1]["Hit"]
-        if hit != "0":
+        if hit > 0:
             continue
 
         query_name = r[1]["QName"]
