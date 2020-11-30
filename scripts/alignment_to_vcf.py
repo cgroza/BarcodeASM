@@ -163,7 +163,7 @@ parser.add_argument("--vcf_out", metavar="vcf_out", type = str, nargs = 1,
 parser.add_argument("--out_contigs", metavar="out_contigs", type = str, nargs = 1,
                     help = "Contains contigs from which variants were selected", default = "selected_contigs.fa")
 parser.add_argument("--flanked_inserts", metavar="flanked_inserts", type = str, nargs = 1,
-                    help = "Contains insertions large flanks added", default = "flanked_contigs.fa")
+                    help = "Contains insertions with flanks added", default = "flanked_contigs.fa")
 parser.add_argument("--flank_length", metavar="flank_length", type = int, nargs = 1,
                     help = "Specify the length of flanks", default = 10000)
 parser.add_argument("--min_insert", metavar="min_insert", type = int, nargs = 1,

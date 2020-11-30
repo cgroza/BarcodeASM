@@ -45,11 +45,13 @@ def collect_genotypes(contig_fasta_path):
     return (samples, loci)
 
 
-def extract_consensus_insertions(contig_path, cons_path, ref_fasta_path, vcf_out_path, vcf_template_path, min_insertion_size):
+def extract_consensus_insertions(contig_path, cons_path, ref_fasta_path, vcf_out_path, vcf_template_path, min_insertion_size, flank_length, flanked_contigs_path):
     n_records = 0
     # open input sequences
     cons_fasta = pysam.FastaFile(cons_path)
     ref_fasta = pysam.FastaFile(ref_fasta_path)
+
+    flanked_contig_fasta = open(flanked_contigs_path, "w")
 
     (samples, loci) = collect_genotypes(contig_path)
     print("Found", len(samples), "samples for", len(loci), "phased loci")
@@ -66,7 +68,12 @@ def extract_consensus_insertions(contig_path, cons_path, ref_fasta_path, vcf_out
         cons_seq  = cons_fasta.fetch(contig)
         ref_seq = ref_fasta.fetch(chrom, start, end)
 
-        aligner = mappy.Aligner(seq = ref_seq, preset = None , k = 10, w = 10, n_threads = 1)
+        aligner = mappy.Aligner(seq = ref_seq, preset = None , k = 15, w = 10, n_threads = 1,
+                                max_join_long = 20000, max_join_short = 10000, min_join_flank_sc = 10,
+                                min_join_flank_ratio = 0.1, max_gap = 10000, bw = 2000, end_bonus = 10,
+                                zdrop = 10000, zdrop_inv = 1000,
+                                scoring = (2, 4, 4, 10, 300, 0, 1),
+                                extra_flags = 0x1)
         alignments = list(aligner.map(cons_seq, seq2 = None, cs = True, MD = False))
 
         if len(alignments) == 0:
@@ -130,7 +137,7 @@ def extract_consensus_insertions(contig_path, cons_path, ref_fasta_path, vcf_out
                                        REF = ref_allele, ALT = [vcfpy.Substitution("INS", ref_allele + alt_allele)],
                                        QUAL = 999, FILTER = ["PASS"],
                                        INFO = vcfpy.OrderedDict(SVLEN = op[0],
-                                                                CIGAR = str(cig),
+                                                                CIGAR = [str(cig)],
                                                                 STRAND = strand,
                                                                 CONTIG_START = str(aln.q_st)),
                                        FORMAT = ["GT", "PS"],
@@ -139,11 +146,24 @@ def extract_consensus_insertions(contig_path, cons_path, ref_fasta_path, vcf_out
                     # output contig that contains this insertion
                     writer.write_record(rec)
 
+                    # output same insertion, but with flanking sequences
+                    # note, the interval is [start, end[
+                    if flank_length > 0:
+                        left_flank = ref_fasta.fetch(chrom, break_point - flank_length, break_point)
+                        right_flank = ref_fasta.fetch(chrom, break_point, break_point + flank_length)
+                    else:
+                        left_flank = ""
+                        right_flank = ""
+
+                    flanked_contig_fasta.writelines([ ">" + contig + "_" + str(cons_pos) + "\n",
+                                                     left_flank + alt_allele[1:] + right_flank + "\n"])
+
                     # output same contig, but with large flanking sequences
                     # note, the interval is [start, end[
                     n_records += 1
 
                 cons_pos += op[0]
+    flanked_contig_fasta.close()
     return n_records
 
 parser = argparse.ArgumentParser("Extract a VCF file from bxlra contig local alignments.")
@@ -159,6 +179,10 @@ parser.add_argument("--vcf_out", metavar="vcf_out", type = str, nargs = 1,
                     help = "VCF path for the output", default = "out.vcf")
 parser.add_argument("--min_insert", metavar="min_insert", type = int, nargs = 1,
                     help = "Minimum insertion size to extract", default = 50)
+parser.add_argument("--flank_length", metavar="flank_length", type = int, nargs = 1,
+                    help = "Specify the length of flanks", default = 0)
+parser.add_argument("--flanked_inserts", metavar="flanked_inserts", type = str, nargs = 1,
+                    help = "Contains insertions with large flanks added", default = "flanked_contigs.fa")
 
 args = parser.parse_args()
 
@@ -167,10 +191,13 @@ print("Consensus contigs", args.cons[0])
 print("Reference", args.ref[0])
 print("VCF template", args.vcf_template[0])
 print("VCF Output path",  args.vcf_out[0])
+print("Flanked inserts fasta output path", args.flanked_inserts[0])
+print("Flank length", args.flank_length)
 print("Minimum insertion size ", args.min_insert[0])
 
 records = extract_consensus_insertions(args.contigs[0], args.cons[0], args.ref[0],
                                        args.vcf_out[0], args.vcf_template[0],
-                                       args.min_insert[0])
+                                       args.min_insert[0], args.flank_length[0],
+                                       args.flanked_inserts[0])
 
 print("Extracted", records, "insertions")
