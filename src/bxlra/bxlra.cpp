@@ -35,12 +35,13 @@ bool split_reads_by_phase = false;
 bool write_gfa = false;
 std::string detect_seqs_fa;
 int poor_alignment_max_mapq = 10;
+int min_cnt = 10;
 } // namespace opt
 
 int main(int argc, char **argv) {
   opterr = 0;
   int c;
-  while ((c = getopt(argc, argv, "q:GSsPat:b:B:r:g:o:F:")) != -1)
+  while ((c = getopt(argc, argv, "k:q:GSsPat:b:B:r:g:o:F:")) != -1)
     switch (c) {
     case 't':
         try {
@@ -51,6 +52,8 @@ int main(int argc, char **argv) {
             return -1;
         }
         break;
+    case 'k':
+      opt::min_cnt = std::stoi(optarg);
     case 'q':
         opt::poor_alignment_max_mapq = std::stoi(optarg);
       break;
@@ -97,6 +100,7 @@ int main(int argc, char **argv) {
   params.simplify = opt::simplify;
   params.split_reads_by_phase = opt::split_reads_by_phase;
   params.write_gfa = opt::write_gfa;
+  params.min_cnt = opt::min_cnt;
 
   std::cerr << "Params r: " << opt::regions_path << std::endl
             << "Params b: " << opt::bam_path << std::endl
