@@ -112,6 +112,7 @@ int main(int argc, char **argv) {
             << "Params S: " << opt::split_reads_by_phase << std::endl
             << "Params s: " << opt::simplify << std::endl
             << "Params q: " << opt::poor_alignment_max_mapq << std::endl
+            << "Params k: " << opt::min_cnt << std::endl
             << "Params G: " << opt::write_gfa << std::endl
             << "Params F: " << opt::detect_seqs_fa << std::endl;
 
