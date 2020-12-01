@@ -54,6 +54,7 @@ int main(int argc, char **argv) {
         break;
     case 'k':
       opt::min_cnt = std::stoi(optarg);
+      break;
     case 'q':
         opt::poor_alignment_max_mapq = std::stoi(optarg);
       break;
