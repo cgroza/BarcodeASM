@@ -1,15 +1,15 @@
-# bxlra - BX local read assembler
+# BarcodeAsm -  local read cloud assembler
 
 This program uses `fermi-lite` and bead barcode information from the 10X
 sequencing protocol to create local assemblies of target regions. We attempt to
 identify unmapped/mismapped reads that are relevant to the local region by
 enumerating the barcodes of the locally mapped reads.
 
-To compile `bxlra` use the following:
+To compile `BarcodeAsm` use the following:
 
 ```
-git clone --recursive https://github.com/cgroza/bxlra.git
-cd bxlra
+git clone --recursive https://github.com/cgroza/BarcodeAsm.git
+cd BarcodeAsm
 ./autogen.sh
 ./configure
 make
@@ -18,7 +18,7 @@ make install
 
 The executable should be in `bin`.
 
-To run `bxlra`, the following arguments are needed:
+To run `BarcodeAsm`, the following arguments are needed:
 + -b : path to the indexed BAM file produced by the `longranger` pipeline
 + -B : path the barcode sorted and indexed BAM file from above
 + -r : path to BED file containing the start and end of local

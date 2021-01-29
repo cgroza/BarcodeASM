@@ -1,11 +1,11 @@
-bin_PROGRAMS = bxlra
+bin_PROGRAMS = BarcodeAsm
 
-bxlra_CPPFLAGS = \
+BarcodeAsm_CPPFLAGS = \
 	-I$(top_srcdir)/CTPL \
 	-I$(top_srcdir)/SeqLib \
 	-I$(top_srcdir)/SeqLib/htslib -Wno-sign-compare
 
-bxlra_LDADD = \
+BarcodeAsm_LDADD = \
 	$(top_builddir)/minimap2/libminimap2.a \
 	$(top_builddir)/SeqLib/src/libseqlib.a \
 	$(top_builddir)/SeqLib/bwa/libbwa.a \
@@ -13,7 +13,7 @@ bxlra_LDADD = \
 	$(top_builddir)/SeqLib/fermi-lite/libfml.a \
 	-llzma -lbz2 -lz
 
-bxlra_SOURCES = bxlra.cpp BxBamWalker.cpp RegionFileReader.cpp LocalAssemblyWindow.cpp LocalAlignment.cpp ContigAlignment.cpp
+BarcodeAsm_SOURCES = BarcodeAsm.cpp BxBamWalker.cpp RegionFileReader.cpp LocalAssemblyWindow.cpp LocalAlignment.cpp ContigAlignment.cpp
 
 install:
-	mkdir -p ../../bin && mv bxlra ../../bin
+	mkdir -p ../../bin && mv BarcodeAsm ../../bin

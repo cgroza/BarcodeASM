@@ -1,8 +1,8 @@
 # Process this file with autoconf to produce a configure script.
 AC_PREREQ(2.59) ## specificy version of autoconf
-AC_INIT(bxlra, 1.0, cristian.groza@mail.mcgill.ca)
+AC_INIT(BarcodeAsm, 1.0, cristian.groza@mail.mcgill.ca)
 AM_INIT_AUTOMAKE(foreign)
-AC_CONFIG_SRCDIR([bxlra.cpp])
+AC_CONFIG_SRCDIR([BarcodeAsm.cpp])
 AC_CONFIG_HEADER([config.h])
 AM_MAINTAINER_MODE([disable])
 

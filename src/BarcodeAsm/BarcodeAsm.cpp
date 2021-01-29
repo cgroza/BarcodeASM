@@ -35,7 +35,7 @@ bool split_reads_by_phase = false;
 bool write_gfa = false;
 std::string detect_seqs_fa;
 int poor_alignment_max_mapq = 10;
-int min_cnt = 10;
+int min_cnt = 8;
 } // namespace opt
 
 int main(int argc, char **argv) {

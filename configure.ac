@@ -1,8 +1,8 @@
 # Process this file with autoconf to produce a configure script.
 AC_PREREQ(2.59) ## specificy version of autoconf
-AC_INIT(bxlra, 1.0, cristian.groza@mail.mcgill.ca)
+AC_INIT(BarcodeAsm, 1.0, cristian.groza@mail.mcgill.ca)
 AM_INIT_AUTOMAKE(foreign)
-AC_CONFIG_SRCDIR([src/bxlra/bxlra.cpp])
+AC_CONFIG_SRCDIR([src/BarcodeAsm/BarcodeAsm.cpp])
 AC_CONFIG_HEADER([config.h])
 AM_MAINTAINER_MODE([disable])
 ##m4_include([m4/m4_ax_openmp.m4])
@@ -43,6 +43,6 @@ AC_CHECK_HEADERS([ \
 
 AC_CONFIG_FILES([Makefile
                 SeqLib/src/Makefile
-                src/bxlra/Makefile])
+                src/BarcodeAsm/Makefile])
 
 AC_OUTPUT

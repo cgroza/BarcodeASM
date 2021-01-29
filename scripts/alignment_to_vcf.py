@@ -147,15 +147,15 @@ def extract_vcf_records(sample_name,
     selected_contig_fasta.close()
     return n_records
 
-parser = argparse.ArgumentParser("Extract a VCF file from bxlra contig local alignments.")
+parser = argparse.ArgumentParser("Extract a VCF file from BarcodeAsm contig local alignments.")
 parser.add_argument("--sample", metavar="sample", type = str, nargs = 1,
                     help = "Sample name")
 parser.add_argument("--ref", metavar="ref", type = str, nargs = 1,
-                    help = "Reference genome used with bxlra")
+                    help = "Reference genome used with BarcodeAsm")
 parser.add_argument("--alns", metavar="alns", type = str, nargs = 1,
-                    help = "alignments.tsv from bxlra")
+                    help = "alignments.tsv from BarcodeAsm")
 parser.add_argument("--contigs", metavar="contigs", type = str, nargs = 1,
-                    help = "contigs.fa from bxlra")
+                    help = "contigs.fa from BarcodeAsm")
 parser.add_argument("--vcf_template", metavar="vcf_template", type = str, nargs = 1,
                     help = "VCF template for you reference genome")
 parser.add_argument("--vcf_out", metavar="vcf_out", type = str, nargs = 1,

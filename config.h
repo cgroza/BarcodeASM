@@ -41,10 +41,10 @@
 #define HAVE_SYS_TYPES_H 1
 
 /* Define to 1 if you have the <tr1/unordered_map> header file. */
-#define HAVE_TR1_UNORDERED_MAP 1
+/* #undef HAVE_TR1_UNORDERED_MAP */
 
 /* Define to 1 if you have the <tr1/unordered_set> header file. */
-#define HAVE_TR1_UNORDERED_SET 1
+/* #undef HAVE_TR1_UNORDERED_SET */
 
 /* Define to 1 if you have the <unistd.h> header file. */
 #define HAVE_UNISTD_H 1
@@ -56,19 +56,19 @@
 #define HAVE_UNORDERED_SET 1
 
 /* Name of package */
-#define PACKAGE "bxlra"
+#define PACKAGE "barcodeasm"
 
 /* Define to the address where bug reports for this package should be sent. */
 #define PACKAGE_BUGREPORT "cristian.groza@mail.mcgill.ca"
 
 /* Define to the full name of this package. */
-#define PACKAGE_NAME "bxlra"
+#define PACKAGE_NAME "BarcodeAsm"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "bxlra 1.0"
+#define PACKAGE_STRING "BarcodeAsm 1.0"
 
 /* Define to the one symbol short name of this package. */
-#define PACKAGE_TARNAME "bxlra"
+#define PACKAGE_TARNAME "barcodeasm"
 
 /* Define to the home page for this package. */
 #define PACKAGE_URL ""

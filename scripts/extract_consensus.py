@@ -166,9 +166,9 @@ def extract_consensus_insertions(contig_path, cons_path, ref_fasta_path, vcf_out
     flanked_contig_fasta.close()
     return n_records
 
-parser = argparse.ArgumentParser("Extract a VCF file from bxlra contig local alignments.")
+parser = argparse.ArgumentParser("Extract a VCF file from BarcodeAsm contig local alignments.")
 parser.add_argument("--ref", metavar="ref", type = str, nargs = 1,
-                    help = "Reference genome used with bxlra")
+                    help = "Reference genome used with BarcodeAsm")
 parser.add_argument("--cons", metavar="cons", type = str, nargs = 1,
                     help = "Consensus sequences generated with msa.py")
 parser.add_argument("--contigs", metavar="contigs", type = str, nargs = 1,
