@@ -16,7 +16,7 @@ rep_mask <- read_rm(repmask_out) %>%
   select(matching_class, repeat_id)
 
 vcf <- read.vcfR(annot_vcf)
-vcf_df <- tibble(CHR = getCHROM(vcf),
+vcf_df <- tibble(CHROM = getCHROM(vcf),
                  POS = getPOS(vcf),
                  qry_id = paste(seq_len(nrow(vcf)), getID(vcf), sep = "_"))
 
@@ -25,4 +25,5 @@ annot <- left_join(vcf_df, rep_mask, by = "qry_id") %>%
   mutate(TE=grepl("(SINE|LINE|LTR|DNA|SVA)", matching_class)) %>%
   select(-qry_id)
 
-write_tsv(annot, file = annot_file)
+write_tsv(annot, file = annot_file, col_names = F)
+print(colnames(annot))
