@@ -103,18 +103,24 @@ int main(int argc, char **argv) {
   params.write_gfa = opt::write_gfa;
   params.min_cnt = opt::min_cnt;
 
-  std::cerr << "Params r: " << opt::regions_path << std::endl
-            << "Params b: " << opt::bam_path << std::endl
-            << "Params B: " << opt::bx_bam_path << std::endl
-            << "Params o: " << params.min_overlap << std::endl
-            << "Params P: " << params.aggressive_bubble_pop << std::endl
-            << "Params a: " << !opt::weird_reads_only << std::endl
-            << "Params S: " << opt::split_reads_by_phase << std::endl
-            << "Params s: " << opt::simplify << std::endl
-            << "Params q: " << opt::poor_alignment_max_mapq << std::endl
-            << "Params k: " << opt::min_cnt << std::endl
-            << "Params G: " << opt::write_gfa << std::endl
-            << "Params F: " << opt::detect_seqs_fa << std::endl;
+  std::cerr << "Param r: " << opt::regions_path << std::endl
+            << "Param b: " << opt::bam_path << std::endl
+            << "Param B: " << opt::bx_bam_path << std::endl
+            << "Param o: " << params.min_overlap << std::endl
+            << "Param P: " << params.aggressive_bubble_pop << std::endl
+            << "Param a: " << !opt::weird_reads_only << std::endl
+            << "Param S: " << opt::split_reads_by_phase << std::endl
+            << "Param s: " << opt::simplify << std::endl
+            << "Param q: " << opt::poor_alignment_max_mapq << std::endl
+            << "Param k: " << opt::min_cnt << std::endl
+            << "Param G: " << opt::write_gfa << std::endl
+            << "Param F: " << opt::detect_seqs_fa << std::endl;
+
+  // check if we have the basic inputs
+  if(opt::regions_path.empty() || opt::bx_bam_path.empty() || opt::bam_path.empty()) {
+      std::cerr << "Missing input files." << std::endl;
+      return 1;
+  }
 
   // Storage for thread pooled resources
   // These not be guarded by mutex, since they assigned to individual thread IDs
@@ -124,7 +130,7 @@ int main(int argc, char **argv) {
 
   // load sequences to be detected in contigs
   SeqLib::UnalignedSequenceVector detect_seqs;
-  if(opt::detect_seqs_fa.size() > 0) {
+  if(!opt::detect_seqs_fa.empty()) {
       SeqLib::FastqReader seq_fa(opt::detect_seqs_fa);
       SeqLib::UnalignedSequence s;
       while(seq_fa.GetNextSequence(s))
